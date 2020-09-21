@@ -1,8 +1,7 @@
 # -*- encoding: utf-8 -*-
-# Pruning
-
 '''
-@author: Seul-Ki Yeom, ....
+@reference: Seul-Ki Yeom et al., "Pruning by explaining: a novel criterion for deep neural network pruning," Pattern Recognition, 2020.
+@author: Seul-Ki Yeom
 '''
 
 from __future__ import print_function
@@ -14,18 +13,20 @@ import os
 from modules.network import Net, ResNet18, ResNet50
 import modules.prune as modules
 
-# os.environ['CUDA_VISIBLE_DEVICES'] = '3'
+os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 
 def get_args():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch VGG16 based ImageNet')
 
-    parser.add_argument('--arch', default='resnet50', metavar='ARCH',
-                        help='model architecture: vgg16, alexnet, ...')
+    parser.add_argument('--arch', default='resnet18', metavar='ARCH',
+                        help='model architecture: resnet18, resnet50 (unused: vgg16, alexnet)')
     parser.add_argument('--train-batch-size', type=int, default=100, metavar='N',
                         help='input batch size for training (default: 32)')
     parser.add_argument('--test-batch-size', type=int, default=100, metavar='N',
                         help='input batch size for testing (default: 20)')
+    parser.add_argument('--trialnum', type=int, default=1, metavar='N',
+                        help='trial number (default: 1)')
     parser.add_argument('--epochs', type=int, default=100, metavar='N',
                         help='number of epochs to train (default: 10)')
     parser.add_argument('--lr', type=float, default=0.1, metavar='LR',
@@ -42,10 +43,10 @@ def get_args():
     # parser.add_argument('--train', action='store_true', help='training data')
     # parser.add_argument('--prune', action='store_true', help='pruning model')
     # parser.add_argument('--relevance', action='store_true', help='Compute relevances')
-    # parser.add_argument('--norm', action='store_true', help='add normalization')
-    parser.add_argument('--resume', type=bool, default=False, metavar='N',
+    parser.add_argument('--norm', action='store_true', help='add normalization')
+    parser.add_argument('--resume', type=bool, default=True, metavar='N',
                         help='if we have pretrained model')
-    parser.add_argument('--train', type=bool, default=True, metavar='N',
+    parser.add_argument('--train', type=bool, default=False, metavar='N',
                         help='training data')
     parser.add_argument('--prune', type=bool, default=True, metavar='N',
                         help='pruning model')
@@ -70,10 +71,9 @@ def get_args():
 if __name__ == '__main__':
     args = get_args()
 
-    # model = Net(None, args)
-    # model = Net('VGG16')
-    # model = Net(args.arch)
     model = {
+        # 'alexnet': models.__dict__[args.arch](pretrained=False),
+        # 'vgg16': models.__dict__[args.arch](pretrained=False),
         'resnet18': ResNet18(),
         'resnet50': ResNet50(),
     }[args.arch.lower()]
