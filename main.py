@@ -13,7 +13,7 @@ import os
 from modules.network import Net, ResNet18, ResNet50
 import modules.prune as modules
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '3'
+#os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 
 def get_args():
     # Training settings
