@@ -141,8 +141,6 @@ class PruningFineTuner:
             data, target = Variable(data), Variable(target)
             self.train_batch(optimizer, batch_idx, data, target, rank_filters)
 
-            break
-
         if self.save_loss == True and rank_filters == False: #save train_loss only during fine-tuning
             self.dt.loc[self.COUNT_TRAIN] = pd.Series({"ratio_pruned": self.ratio_pruned_filters,
                                                        "train_loss": self.train_loss / len(self.train_loader.dataset)})
