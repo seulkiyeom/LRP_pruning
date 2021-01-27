@@ -19,8 +19,6 @@ class PruningFineTuner:
         if args.cuda:
             torch.cuda.manual_seed(args.seed)
 
-        kwargs = {'num_workers': 1, 'pin_memory': True} if args.cuda else {}
-
         lrp_params_def1 = {
             'conv2d_ignorebias': True,
             'eltwise_eps': 1e-6,
@@ -71,7 +69,7 @@ class PruningFineTuner:
         # Data Acquisition
         get_dataset = {
             "cifar10": dataset.get_cifar10,  # CIFAR-10
-            'imagenet': dataset.get_imagenet, # ImageNet
+            # 'imagenet': dataset.get_imagenet, # ImageNet
         }[self.args.data_type.lower()]
         train_dataset, test_dataset = get_dataset()
         print(f"train_dataset:{len(train_dataset)}, test_dataset:{len(test_dataset)}")

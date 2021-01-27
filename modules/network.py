@@ -14,31 +14,51 @@ cfg = {
     'VGG19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
 }
 
-# class Net(nn.Module): vgg16
-#     def __init__(self, vgg_name):
-#         super(Net, self).__init__()
-#         self.features = self._make_layers(cfg[vgg_name])
-#         self.classifier = nn.Linear(512, 10)
-#
-#     def forward(self, x):
-#         out = self.features(x)
-#         out = out.view(out.size(0), -1)
-#         out = self.classifier(out)
-#         return out
-#
-#     def _make_layers(self, cfg):
-#         layers = []
-#         in_channels = 3
-#         for x in cfg:
-#             if x == 'M':
-#                 layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
-#             else:
-#                 layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
-#                            nn.BatchNorm2d(x),
-#                            nn.ReLU(inplace=True)]
-#                 in_channels = x
-#         layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
-#         return nn.Sequential(*layers)
+
+class VGG_Alex(nn.Module):
+    def __init__(self, arch):
+        super(Net, self).__init__()
+        # Model Selection
+        num_classes = 10
+        original_model = models.__dict__[arch](pretrained=True)
+
+        if arch.startswith('vgg16'):
+            self.features = original_model.features
+            self.classifier = nn.Sequential(OrderedDict([
+                ('do1', nn.Dropout()),
+                ('fc1', nn.Linear(25088, 4096)),
+                ('fc_relu1', nn.ReLU(inplace=True)),
+                ('do2', nn.Dropout()),
+                ('fc2', nn.Linear(4096, 4096)),
+                ('fc_relu2', nn.ReLU(inplace=True)),
+                ('fc3', nn.Linear(4096, num_classes))
+            ]))
+            self.modelName = 'vgg16'
+        elif arch.startswith('alexnet'):
+            self.features = original_model.features
+            self.classifier = nn.Sequential(OrderedDict([
+                nn.Dropout(),
+                nn.Linear(256 * 6 * 6, 4096),
+                nn.ReLU(inplace=True),
+                nn.Dropout(),
+                nn.Linear(4096, 4096),
+                nn.ReLU(inplace=True),
+                nn.Linear(4096, num_classes)
+            ]))
+            self.modelName = 'alexnet'
+        else:
+            raise ("Finetuning not supported on this architecture yet")
+
+        for param in self.features.parameters():
+            param.requires_grad = False
+
+    def forward(self, x):
+        in_size = x.size(0)
+        x = self.features(x)
+        x = x.view(in_size, -1)  # flatten the tensor
+        x = self.classifier(x)
+        return x
+
 
 class Net(nn.Module): #resnet by me
     def __init__(self, arch):

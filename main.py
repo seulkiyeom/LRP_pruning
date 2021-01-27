@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 '''
 @reference: Seul-Ki Yeom et al., "Pruning by explaining: a novel criterion for deep neural network pruning," Pattern Recognition, 2020.
-@author: Seul-Ki Yeom
+@author: Seul-Ki Yeom, Philipp Seegerer, Sebastian Lapuschkin, Alexander Binder, Simon Wiedemann, Klaus-Robert Müller, Wojciech Samek
 '''
 
 from __future__ import print_function
@@ -10,8 +10,9 @@ import numpy as np
 import torch
 import os
 
-from modules.network import Net, ResNet18, ResNet50
-import modules.prune as modules
+from modules.network import ResNet18, ResNet50, VGG_Alex
+import modules.prune_resnet as modules_resnet
+import modules.prune_vgg as modules_vgg
 
 #os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 
@@ -19,8 +20,8 @@ def get_args():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch VGG16 based ImageNet')
 
-    parser.add_argument('--arch', default='resnet18', metavar='ARCH',
-                        help='model architecture: resnet18, resnet50 (unused: vgg16, alexnet)')
+    parser.add_argument('--arch', default='vgg16', metavar='ARCH',
+                        help='model architecture: resnet18, resnet50, vgg16, alexnet')
     parser.add_argument('--train-batch-size', type=int, default=100, metavar='N',
                         help='input batch size for training (default: 32)')
     parser.add_argument('--test-batch-size', type=int, default=100, metavar='N',
@@ -72,8 +73,8 @@ if __name__ == '__main__':
     args = get_args()
 
     model = {
-        # 'alexnet': models.__dict__[args.arch](pretrained=False),
-        # 'vgg16': models.__dict__[args.arch](pretrained=False),
+        'alexnet': VGG_Alex(arch=args.arch),
+        'vgg16': VGG_Alex(arch=args.arch),
         'resnet18': ResNet18(),
         'resnet50': ResNet50(),
     }[args.arch.lower()]
@@ -85,7 +86,10 @@ if __name__ == '__main__':
     if args.cuda:
         model = model.cuda()
 
-    fine_tuner = modules.PruningFineTuner(args, model)
+    if args.arch.lower() in ['resnet18', 'resnet50']:
+        fine_tuner = modules_resnet.PruningFineTuner(args, model)
+    elif args.arch.lower() in ['vgg16', 'alexnet']:
+        fine_tuner = modules_vgg.PruningFineTuner(args, model)
 
     if args.train:
         print(f'Start training! Dataset: {args.data_type}, Architecture: {args.arch}, Epoch: {args.epochs}')
