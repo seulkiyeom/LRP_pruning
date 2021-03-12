@@ -10,7 +10,9 @@
 > VGG-16, AlexNet
 > 
 
+- Toy Experiment
+>  https://github.com/seulkiyeom/LRP_Pruning_toy_example
 
 - Reference 
 
-> Seul-Ki Yeom, Philipp Seegerer, Sebastian Lapuschkin, Alexander Binder, Simon Wiedemann, Klaus-Robert Müller, Wojciech Samek, "Pruning by explaining: a novel criterion for deep neural network pruning," Pattern Recognition, 2020 (under revision).
+> Seul-Ki Yeom, Philipp Seegerer, Sebastian Lapuschkin, Alexander Binder, Simon Wiedemann, Klaus-Robert Müller, Wojciech Samek, "Pruning by explaining: a novel criterion for deep neural network pruning," Pattern Recognition, 2021.
