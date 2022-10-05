@@ -1,10 +1,31 @@
-# LRP based Structured Pruning
+# LRP-based Structured Pruning
 
-## Requirements
-> Pytorch 1.6.0+ \
-> Python 3.8+ \
-> pandas
-> 
+## How to run
+
+### Installation
+- Clone this repository and enter it: 
+    ```bash
+    git clone https://github.com/LukasHedegaard/LRP_pruning.git
+    cd LRP_pruning
+    ```
+- (Optionally) create conda environment:
+    ```bash
+    conda create --name LRP_pruning python=3.10
+    ```
+- Install as editable module
+    ```bash
+    pip install -e .[dev]
+    ```
+
+### Pretrained weights
+Trained model weights are available [here](https://drive.google.com/drive/folders/1m6aV5Zv8tAytvxF6qY4m9nyqlkKv0y72?usp=sharing).
+
+
+### Lint
+Lint using [black](https://github.com/psf/black) and [isort](https://github.com/timothycrosley/isort/):
+```bash
+make lint
+```
 
 ## Model
 > ResNet-18, ResNet-50\
@@ -16,9 +37,7 @@
 >  
 
 ## Reference 
-
-If you make use of, or are inspired by our work and code, please cite our paper
-```
+```bibtex
 @article{yeom2021pruning,
   title={Pruning by explaining: A novel criterion for deep neural network pruning},
   author={Yeom, Seul-Ki and
@@ -33,6 +52,4 @@ If you make use of, or are inspired by our work and code, please cite our paper
   year={2021},
   publisher={Elsevier}
 }
-
-
 ```
