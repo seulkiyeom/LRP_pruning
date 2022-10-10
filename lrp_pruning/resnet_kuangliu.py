@@ -1,5 +1,4 @@
 import copy
-
 import torch
 import torch.nn as nn
 
@@ -33,9 +32,9 @@ class BasicBlock_kuangliu_c(nn.Module):
         )
         self.bn2 = nn.BatchNorm2d(planes)
 
-        self.shortcut = nn.Sequential()
+        self.downsample = nn.Sequential()
         if stride != 1 or in_planes != self.expansion * planes:
-            self.shortcut = nn.Sequential(
+            self.downsample = nn.Sequential(
                 nn.Conv2d(
                     in_planes,
                     self.expansion * planes,
@@ -52,8 +51,8 @@ class BasicBlock_kuangliu_c(nn.Module):
     def forward(self, x):
         out = self.somerelu(self.bn1(self.conv1(x)))
         out = self.bn2(self.conv2(out))
-        # out += self.shortcut(x)
-        out = self.elt(torch.stack([out, self.shortcut(x)], dim=0))
+        # out += self.downsample(x)
+        out = self.elt(torch.stack([out, self.downsample(x)], dim=0))
         out = self.somerelu(out)
         return out
 
@@ -74,9 +73,9 @@ class Bottleneck_kuangliu_c(nn.Module):
         )
         self.bn3 = nn.BatchNorm2d(self.expansion * planes)
 
-        self.shortcut = nn.Sequential()
+        self.downsample = nn.Sequential()
         if stride != 1 or in_planes != self.expansion * planes:
-            self.shortcut = nn.Sequential(
+            self.downsample = nn.Sequential(
                 nn.Conv2d(
                     in_planes,
                     self.expansion * planes,
@@ -94,8 +93,8 @@ class Bottleneck_kuangliu_c(nn.Module):
         out = self.somerelu(self.bn1(self.conv1(x)))
         out = self.somerelu(self.bn2(self.conv2(out)))
         out = self.bn3(self.conv3(out))
-        # out += self.shortcut(x)
-        out = self.elt(torch.stack([out, self.shortcut(x)], dim=0))
+        # out += self.downsample(x)
+        out = self.elt(torch.stack([out, self.downsample(x)], dim=0))
         out = self.somerelu(out)
         return out
 
@@ -111,7 +110,7 @@ class ResNet_kuangliu_c(nn.Module):
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
-        self.linear = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear(512 * block.expansion, num_classes)
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.somerelu = nn.ReLU()
@@ -136,7 +135,7 @@ class ResNet_kuangliu_c(nn.Module):
         out = self.avgpool(out)
         out = torch.flatten(out, 1)
 
-        out = self.linear(out)
+        out = self.fc(out)
         return out
 
     def setbyname(self, name, value):
@@ -200,9 +199,20 @@ class ResNet_kuangliu_c(nn.Module):
                     thisis_inputconv_andiwant_zbeta = False
 
                 m = copy.deepcopy(last_src_module)
-                m = bnafterconv_overwrite_intoconv(
-                    m, bn=src_module
-                )  # outcomment if you want no conv-bn fusion
+                # try:
+                #     m = copy.deepcopy(last_src_module)
+                # except RuntimeError:
+                #     m = last_src_module
+                #     torch.nn.utils.prune.remove(m, "weight")
+                #     if m.bias is not None:
+                #         torch.nn.utils.prune.remove(m, "bias")
+                #     # m._forward_pre_hooks = (
+                #     #     OrderedDict()
+                #     # )  # Remove hooks from torch prune
+                #     m = copy.deepcopy(m)
+
+                # outcomment if you want no conv-bn fusion
+                m = bnafterconv_overwrite_intoconv(m, bn=src_module)
                 # wrap conv
                 wrapped = get_lrpwrapperformodule(
                     m,

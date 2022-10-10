@@ -142,3 +142,4 @@ queue/next.sh
 
 .vscode
 *.npy
+wandb/

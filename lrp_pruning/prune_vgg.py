@@ -115,7 +115,7 @@ class FilterPruner:
         )  # 뒤에서부터 하나씩 끄집어 냄
         activation = self.activations[activation_index]
 
-        if self.args.method_type == "ICLR":
+        if self.args.method_type == "taylor":
             values = (
                 torch.sum((activation * grad), dim=0, keepdim=True)
                 .sum(dim=2, keepdim=True)
@@ -180,7 +180,7 @@ class FilterPruner:
                         # v = v / torch.sqrt(torch.sum(v * v)) #L2
                         self.filter_ranks[i] = v.cpu()
                     elif (
-                        self.args.method_type == "ICLR"
+                        self.args.method_type == "taylor"
                     ):  # |grad*act| & L2-norm (Molchanov et al., ICLR 2017)
                         v = torch.abs(self.filter_ranks[i])
                         v = v / torch.sqrt(torch.sum(v * v))
@@ -195,7 +195,7 @@ class FilterPruner:
                     if self.args.method_type == "weight":  # weight
                         v = self.filter_ranks[i]
                         self.filter_ranks[i] = v.cpu()
-                    elif self.args.method_type == "ICLR":  # |grad*act|
+                    elif self.args.method_type == "taylor":  # |grad*act|
                         v = torch.abs(self.filter_ranks[i])
                         self.filter_ranks[i] = v.cpu()
                     elif self.args.method_type == "grad":  # |grad|
@@ -206,7 +206,7 @@ class FilterPruner:
         filters_to_prune = self.lowest_ranking_filters(num_filters_to_prune)
         # filters_to_prune: filters to be pruned 1) layer number, 2) filter number, 3) its value
 
-        # After each of the k filters are prunned,
+        # After each of the k filters are pruned,
         # the filter index of the next filters change since the model is smaller.
         filters_to_prune_per_layer = {}
         for (l, f, _) in filters_to_prune:
@@ -482,15 +482,13 @@ class PruningFineTuner:
                 num_filters_to_prune_per_iteration
             )
             # prune_targets: 잘라야 할 filter들의 1) layer number, 2) filter number가 넘어옴
-            layers_prunned = {}
+            layers_pruned = {}
             for layer_index, filter_index in prune_targets:
-                if layer_index not in layers_prunned:
-                    layers_prunned[layer_index] = 0
-                layers_prunned[layer_index] += 1
+                if layer_index not in layers_pruned:
+                    layers_pruned[layer_index] = 0
+                layers_pruned[layer_index] += 1
 
-            print(
-                "Layers that will be prunned", layers_prunned
-            )  # 총 잘릴 layer 별 filter 수
+            print("Layers that will be pruned", layers_pruned)  # 총 잘릴 layer 별 filter 수
             print("Prunning filters.. ")
             model = self.model.cpu()  # 현재 모델 갖다가..
             for layer_index, filter_index in prune_targets:  # 하나씩 꺼내서 자르기 시작
@@ -503,7 +501,7 @@ class PruningFineTuner:
             message = (
                 str(100 * float(self.total_num_filters()) / number_of_filters) + "%"
             )
-            print("Filters prunned", str(message))
+            print("Filters pruned", str(message))
             self.test()  # 잘리고 나서 test 해봄
             print("Fine tuning to recover from prunning iteration.")
             optimizer = optim.SGD(

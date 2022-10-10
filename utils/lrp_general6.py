@@ -475,7 +475,7 @@ def linearafterbn_returntensorbiasedlinearlayer(linearlayer, bn):  # after visat
 #########################################################
 ###########################################################
 
-# for resnet shortcut / residual connections
+# for resnet downsample / residual connections
 class eltwisesum2(nn.Module):  # see torchray excitation backprop, using *inputs
     def __init__(self):
         super(eltwisesum2, self).__init__()
@@ -950,7 +950,10 @@ class adaptiveavgpool2d_wrapper_fct(torch.autograd.Function):
             propertynames = ["output_size"]
             values = []
             for attr in propertynames:
-                v = getattr(module, attr)
+                try:
+                    v = getattr(module, attr)
+                except AttributeError:
+                    v = getattr(module.module, attr)
                 # convert it into tensor
                 # has no treatment for booleans yet
                 if isinstance(v, int):

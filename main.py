@@ -23,14 +23,12 @@ def get_args():
     parser.add_argument(
         "--arch",
         default="vgg16",
-        metavar="ARCH",
         help="model architecture: resnet18, resnet50, vgg16, alexnet",
     )
     parser.add_argument(
         "--batch-size",
         type=int,
         default=128,
-        metavar="N",
         help="input batch size",
     )
     parser.add_argument(
@@ -40,21 +38,24 @@ def get_args():
         "--epochs",
         type=int,
         default=10,
-        metavar="N",
         help="number of epochs to train (default: 10)",
+    )
+    parser.add_argument(
+        "--recovery_epochs",
+        type=int,
+        default=10,
+        help="number of epochs to train to recover accuracy after pruning (default: 10)",
     )
     parser.add_argument(
         "--lr",
         type=float,
         default=0.1,
-        metavar="LR",
         help="learning rate (default: 0.001)",
     )
     parser.add_argument(
         "--momentum",
         type=float,
         default=0.9,
-        metavar="M",
         help="SGD momentum (default: 0.5)",
     )
     parser.add_argument(
@@ -62,7 +63,6 @@ def get_args():
         "--wd",
         type=float,
         default=5e-4,
-        metavar="W",
         help="weight decay (default: 1e-4)",
     )
     parser.add_argument(
@@ -74,11 +74,10 @@ def get_args():
     # parser.add_argument('--relevance', action='store_true', help='Compute relevances')
     parser.add_argument("--norm", action="store_true", help="add normalization")
     parser.add_argument(
-        "--resume",
-        type=bool,
-        default=False,
-        metavar="N",
-        help="if we have pretrained model",
+        "--resume_from_ckpt",
+        type=str,
+        default="",
+        help="Path to pretrained model",
     )
     parser.add_argument("--train", action="store_true", help="training data")
     parser.add_argument("--prune", action="store_true", help="pruning model")
@@ -86,22 +85,31 @@ def get_args():
         "--method-type",
         type=str,
         default="lrp",
-        metavar="N",
-        help="model architecture selection: grad/taylor/weight/lrp",
+        help="model architecture selection",
+        choices=["grad", "taylor", "weight", "lrp"],
     )
-
+    parser.add_argument(
+        "--limit-train-batches",
+        type=int,
+        default=-1,
+        help="Limit the number of training batches",
+    )
+    parser.add_argument(
+        "--limit-test-batches",
+        type=int,
+        default=-1,
+        help="Limit the number of testing batches",
+    )
     parser.add_argument(
         "--total-pr",
         type=float,
         default=9.001 / 10.0,
-        metavar="M",
         help="Total pruning rate",
     )
     parser.add_argument(
         "--pr-step",
         type=float,
         default=0.05,
-        metavar="M",
         help="Pruning step: 0.05 (5% for each step)",
     )
 
@@ -109,7 +117,6 @@ def get_args():
         "--data-type",
         type=str,
         default="cifar10",
-        metavar="N",
         help="model architecture selection: cifar10/imagenet",
     )
     parser.add_argument(
@@ -132,11 +139,8 @@ if __name__ == "__main__":
         "resnet50": ResNet50,
     }[args.arch.lower()](NUM_CLASSES[args.data_type])
 
-    if args.resume:
-        save_loc = f"./checkpoint/{args.arch}_{args.data_type}_ckpt.pth"
-        model.load_state_dict(
-            torch.load(save_loc)
-        ) if args.cuda else model.load_state_dict(torch.load(save_loc))
+    if args.resume_from_ckpt:
+        model.load_state_dict(torch.load(args.resume_from_ckpt))
 
     if args.cuda:
         model = model.cuda()

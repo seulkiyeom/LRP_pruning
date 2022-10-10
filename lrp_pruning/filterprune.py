@@ -19,9 +19,13 @@ def save_gradient(self, grad_input, grad_output):
 
 class FilterPruner:
     def __init__(self, model, args):
-        self.model = model
+        self.set_model(model)
         self.reset()
         self.args = args
+
+    def set_model(self, model):
+        self.model = model
+        self.forward_hook()
 
     def reset(self):
         self.filter_ranks = {}
@@ -31,10 +35,6 @@ class FilterPruner:
         # For Forward Hook
         for _, module in self.model.named_modules():
             module.register_forward_hook(fhook)
-        # for name, module in self.model.classifier.named_modules():
-        #     module.register_forward_hook(fhook)
-
-        for name, module in self.model.named_modules():
             if isinstance(module, nn.Conv2d):
                 module.register_backward_hook(save_gradient)
 
@@ -57,12 +57,14 @@ class FilterPruner:
                                 module.module.weight.abs(), dim=(1, 2, 3)
                             )
 
-                        if hasattr(module, "output_mask"):
-                            values[module.output_mask == 0] = EXTREMELY_HIGH_VALUE
+                        if hasattr(module.module, "output_mask"):
+                            values[
+                                module.module.output_mask == 0
+                            ] = EXTREMELY_HIGH_VALUE
                         self.filter_ranks[name] += (
                             values.cpu() if torch.cuda.is_available() else values
                         )
-            elif criterion == "grad" or criterion == "ICLR":
+            elif criterion == "grad" or criterion == "taylor":
                 if isinstance(module, nn.Conv2d) and layer_type == "conv":
                     if name not in self.filter_ranks:
                         self.filter_ranks[name] = torch.zeros(module.output.shape[1])
@@ -74,7 +76,7 @@ class FilterPruner:
                             * module.output.size(2)
                             * module.output.size(3)
                         )
-                    elif criterion == "ICLR":
+                    elif criterion == "taylor":
                         values = torch.sum((module.output * module.grad), dim=(0, 2, 3))
                         values = values / (
                             module.output.size(0)
@@ -93,9 +95,8 @@ class FilterPruner:
         self.weights = []
         self.gradients = []
         self.grad_index = 0
-        self.activation_to_layer = (
-            {}
-        )  # conv layer의 순서 7: 17의미는 7번째 conv layer가 전체에서 17번째에 있다라는 뜻
+        # conv layer의 순서 7: 17의미는 7번째 conv layer가 전체에서 17번째에 있다라는 뜻
+        self.activation_to_layer = {}
 
         activation_index = 0
         for layer, (name, module) in enumerate(self.model.features._modules.items()):
@@ -118,7 +119,7 @@ class FilterPruner:
         )  # 뒤에서부터 하나씩 끄집어 냄
         activation = self.activations[activation_index]
 
-        if self.args.method_type == "ICLR":
+        if self.args.method_type == "taylor":
             values = (
                 torch.sum((activation * grad), dim=0, keepdim=True)
                 .sum(dim=2, keepdim=True)
@@ -170,7 +171,6 @@ class FilterPruner:
                 if self.args.method_type == "lrp":  # it doesn't need
                     v = self.filter_ranks[i]
                     v = v / torch.sum(v[v < EXTREMELY_HIGH_VALUE])
-                    self.filter_ranks[i] = v.cpu()
                 elif (
                     self.args.method_type == "weight"
                 ):  # weight & L1-norm (Li et al., ICLR 2017)
@@ -178,9 +178,8 @@ class FilterPruner:
                     v = v / torch.sum(
                         v[v < EXTREMELY_HIGH_VALUE]
                     )  # torch.sum(v) = total number of dataset
-                    self.filter_ranks[i] = v.cpu()
                 elif (
-                    self.args.method_type == "ICLR"
+                    self.args.method_type == "taylor"
                 ):  # |grad*act| & L2-norm (Molchanov et al., ICLR 2017)
                     v = torch.abs(self.filter_ranks[i])
                     v = v / torch.sqrt(
@@ -188,7 +187,6 @@ class FilterPruner:
                             v[v < EXTREMELY_HIGH_VALUE] * v[v < EXTREMELY_HIGH_VALUE]
                         )
                     )
-                    self.filter_ranks[i] = v.cpu()
                 elif (
                     self.args.method_type == "grad"
                 ):  # |grad| & L2-norm (Sun et al., ICML 2017)
@@ -198,17 +196,14 @@ class FilterPruner:
                             v[v < EXTREMELY_HIGH_VALUE] * v[v < EXTREMELY_HIGH_VALUE]
                         )
                     )
-                    self.filter_ranks[i] = v.cpu()
             else:
                 if self.args.method_type == "weight":  # weight
                     v = self.filter_ranks[i]
-                    self.filter_ranks[i] = v.cpu()
-                elif self.args.method_type == "ICLR":  # |grad*act|
+                elif self.args.method_type == "taylor":  # |grad*act|
                     v = torch.abs(self.filter_ranks[i])
-                    self.filter_ranks[i] = v.cpu()
                 elif self.args.method_type == "grad":  # |grad|
                     v = torch.abs(self.filter_ranks[i])
-                    self.filter_ranks[i] = v.cpu()
+            self.filter_ranks[i] = v.cpu()
 
     def get_prunning_plan(self, num_filters_to_prune):
         ranked_filters = self.lowest_ranking_filters(num_filters_to_prune)
