@@ -297,7 +297,7 @@ class PruningFineTuner:
 
         test_loss /= ctr
         test_accuracy = float(correct) / ctr
-        # self.logger.add_scalars({"test/loss": test_loss, "test/acc": test_accuracy})
+        self.logger.add_scalars({"test/loss": test_loss, "test/acc": test_accuracy})
         # self.correct += correct
 
         if self.save_loss:
@@ -315,9 +315,9 @@ class PruningFineTuner:
             param_value = flop.get_model_parameters_number_value_mask(self.model)
             self.model.eval().stop_flops_count()
             self.model = fcm.remove_flops_counting_methods(self.model)
-            # self.logger.add_scalars(
-            #     {"test/flops": flop_value, "test/params": param_value}
-            # )
+            self.logger.add_scalars(
+                {"test/flops": flop_value, "test/params": param_value}
+            )
 
             return test_accuracy, test_loss, flop_value, param_value
 
@@ -443,7 +443,6 @@ class PruningFineTuner:
                 "test/params": param_value,
             }
             self.df.loc[self.COUNT_ROW] = pd.Series(metrics)
-            # self.logger.add_scalars(metrics, step=self.COUNT_ROW)
             self.logger.add_scalars(metrics)
             self.COUNT_ROW += 1
             self.df.to_csv(results_file)
