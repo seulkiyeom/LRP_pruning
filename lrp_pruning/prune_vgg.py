@@ -263,7 +263,7 @@ class PruningFineTuner:
         get_dataset = {
             "cifar10": dataset.get_cifar10,  # CIFAR-10
             # 'imagenet': dataset.get_imagenet, # ImageNet
-        }[self.args.data_type.lower()]
+        }[self.args.dataset.lower()]
         train_dataset, test_dataset = get_dataset()
         print(f"train_dataset:{len(train_dataset)}, test_dataset:{len(test_dataset)}")
         # Data Loader (Input Pipeline)

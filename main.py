@@ -114,7 +114,7 @@ def get_args():
     )
 
     parser.add_argument(
-        "--data-type",
+        "--dataset",
         type=str,
         default="cifar10",
         help="model architecture selection: cifar10/imagenet",
@@ -137,7 +137,7 @@ if __name__ == "__main__":
         "vgg16": Vgg16,
         "resnet18": ResNet18,
         "resnet50": ResNet50,
-    }[args.arch.lower()](NUM_CLASSES[args.data_type])
+    }[args.arch.lower()](NUM_CLASSES[args.dataset])
 
     if args.resume_from_ckpt:
         model.load_state_dict(torch.load(args.resume_from_ckpt))
@@ -152,13 +152,13 @@ if __name__ == "__main__":
 
     if args.train:
         print(
-            f"Start training! Dataset: {args.data_type}, Architecture: {args.arch}, Epoch: {args.epochs}"
+            f"Start training! Dataset: {args.dataset}, Architecture: {args.arch}, Epoch: {args.epochs}"
         )
         fine_tuner.train(epochs=args.epochs)
 
     if args.prune:
         print(
-            f"Start pruning! Dataset: {args.data_type}, Architecture: {args.arch}, Pruning Method: {args.method_type},"
+            f"Start pruning! Dataset: {args.dataset}, Architecture: {args.arch}, Pruning Method: {args.method_type},"
             f" Total Pruning rate: {args.total_pr}, Pruning step: {args.pr_step}"
         )
         fine_tuner.prune()

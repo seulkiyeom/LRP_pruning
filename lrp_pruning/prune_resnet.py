@@ -88,7 +88,7 @@ class PruningFineTuner:
         get_dataset = {
             "cifar10": dataset.get_cifar10,  # CIFAR-10
             # 'imagenet': dataset.get_imagenet, # ImageNet
-        }[self.args.data_type.lower()]
+        }[self.args.dataset.lower()]
         train_dataset, test_dataset = get_dataset()
         self.logger.info(
             f"train_dataset:{len(train_dataset)}, test_dataset:{len(test_dataset)}"
@@ -133,20 +133,17 @@ class PruningFineTuner:
             )
             # optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr)
         scheduler = optim.lr_scheduler.StepLR(
-            optimizer, step_size=max(1, epochs // 4), gamma=0.1
+            optimizer, step_size=max(1, epochs // 4), gamma=0.2
         )
 
         for i in range(epochs):
-            self.logger.add_scalar("train/epoch", i, step=self.training_epoch)
+            self.logger.add_scalar("train/epoch", i)
             try:  # during training
-                self.logger.add_scalar(
-                    "train/lr", scheduler.get_last_lr()[0], step=self.training_epoch
-                )
+                self.logger.add_scalar("train/lr", scheduler.get_last_lr()[0])
                 self.train_epoch(optimizer=optimizer)
                 acc, loss, *_ = self.test()
-                self.logger.add_scalars(
-                    {"val/acc": acc, "val/loss": loss}, step=self.training_epoch
-                )
+                self.logger.add_scalars({"test/acc": acc, "test/loss": loss})
+
                 scheduler.step()
 
                 if self.ratio_pruned_filters not in self.best_acc:
@@ -154,7 +151,7 @@ class PruningFineTuner:
 
                 if acc > self.best_acc[self.ratio_pruned_filters]:
                     self.best_acc[self.ratio_pruned_filters] = acc
-                    save_loc = f"{self.logger.log_dir}/{self.args.arch}_{self.args.data_type}_{self.ratio_pruned_filters}.pth"
+                    save_loc = f"{self.logger.log_dir}/{self.args.arch}_{self.args.dataset}_{self.ratio_pruned_filters}.pth"
                     self.logger.info(f"saving model to {save_loc}")
                     torch.save(self.model.state_dict(), save_loc)
 
@@ -189,7 +186,7 @@ class PruningFineTuner:
                 break
             if self.args.cuda:
                 data, target = data.cuda(), target.cuda()
-            data, target = Variable(data), Variable(target)
+            # data, target = Variable(data), Variable(target)
             self.train_batch(optimizer, batch_idx, data, target, rank_filters)
 
         if (
@@ -201,7 +198,8 @@ class PruningFineTuner:
                     "train_loss": self.train_loss / len(self.train_loader.dataset),
                 }
             )
-            self.training_epoch += 1
+        self.training_epoch += 1
+        self.train_loss
 
     def train_batch(self, optimizer, batch_idx, batch, label, rank_filters):
         # self.logger.info(
@@ -212,16 +210,17 @@ class PruningFineTuner:
         if optimizer is not None:
             optimizer.zero_grad()
 
-        with torch.enable_grad():
-            output = self.model(batch)
+        # with torch.enable_grad():
+        # output = self.model(batch)
+        output = self.model(batch)
 
         if rank_filters:  # for pruning
             batch.requires_grad = True
             if (
                 self.args.method_type == "lrp" or self.args.method_type == "weight"
             ):  # lrp_based
-                with torch.enable_grad():
-                    output = self.wrapper_model(batch)
+                # with torch.enable_grad():
+                output = self.wrapper_model(batch)
 
                 # self.logger.info("Computing LRP")
 
@@ -255,9 +254,6 @@ class PruningFineTuner:
                 loss = self.criterion(output, label)
                 loss.backward()
 
-            self.pruner.compute_filter_criterion(
-                self.layer_type, criterion=self.args.method_type
-            )
             self.logger.debug(
                 f"Loss = {loss.item():.3f}, output.sum() = {output.sum():.2f}, grad.sum() = {batch.grad.sum():.2f}, (step = {batch_idx})"
             )
@@ -301,7 +297,7 @@ class PruningFineTuner:
 
         test_loss /= ctr
         test_accuracy = float(correct) / ctr
-        self.logger.add_scalars({"test/loss": test_loss, "test/acc": test_accuracy})
+        # self.logger.add_scalars({"test/loss": test_loss, "test/acc": test_accuracy})
         # self.correct += correct
 
         if self.save_loss:
@@ -319,9 +315,9 @@ class PruningFineTuner:
             param_value = flop.get_model_parameters_number_value_mask(self.model)
             self.model.eval().stop_flops_count()
             self.model = fcm.remove_flops_counting_methods(self.model)
-            self.logger.add_scalars(
-                {"test/flops": flop_value, "test/params": param_value}
-            )
+            # self.logger.add_scalars(
+            #     {"test/flops": flop_value, "test/params": param_value}
+            # )
 
             return test_accuracy, test_loss, flop_value, param_value
 
@@ -336,6 +332,7 @@ class PruningFineTuner:
         self.pruner.normalize_ranks_per_layer()  # Normalization
 
         ret = self.pruner.get_prunning_plan(num_filters_to_prune)
+        self.pruner.reset()
         return ret
 
     def copy_mask(self):
@@ -366,6 +363,14 @@ class PruningFineTuner:
         # Get the accuracy before pruning
         self.temp = 0
         test_accuracy, test_loss, flop_value, param_value = self.test()
+        # self.logger.add_scalars(
+        #     {
+        #         "test/loss": test_loss,
+        #         "test/acc": test_accuracy,
+        #         "test/flops": flop_value,
+        #         "test/params": param_value,
+        #     }
+        # )
 
         # Make sure all the layers are trainable
         for param in self.model.parameters():
@@ -377,8 +382,8 @@ class PruningFineTuner:
         iterations = int(iterations * self.args.total_pr)
 
         self.ratio_pruned_filters = 1.0
-        results_file = f"{self.logger.log_dir}/scenario1_results_{self.args.data_type}_{self.args.arch}_{self.args.method_type}_trial{self.args.trialnum:02d}.csv"
-        results_file_train = f"{self.logger.log_dir}/scenario1_train_{self.args.data_type}_{self.args.arch}_{self.args.method_type}_trial{self.args.trialnum:02d}.csv"
+        results_file = f"{self.logger.log_dir}/scenario1_results_{self.args.dataset}_{self.args.arch}_{self.args.method_type}_trial{self.args.trialnum:02d}.csv"
+        results_file_train = f"{self.logger.log_dir}/scenario1_train_{self.args.dataset}_{self.args.arch}_{self.args.method_type}_trial{self.args.trialnum:02d}.csv"
         self.df = pd.DataFrame(
             columns=["ratio_pruned", "test_acc", "test_loss", "flops", "params"]
         )
@@ -399,33 +404,6 @@ class PruningFineTuner:
                 num_filters_to_prune_per_iteration, layer_type="conv"
             )
             assert len(prune_targets) == num_filters_to_prune_per_iteration
-
-            layers_pruned = {}
-            for layer_index, filter_index in prune_targets:
-                if layer_index not in layers_pruned:
-                    layers_pruned[layer_index] = 0
-                layers_pruned[layer_index] += 1
-
-            print("Layers that will be pruned", layers_pruned)
-            print("Prunning filters.. ")
-            # model = self.model.cpu()  # 현재 모델 갖다가..
-            # ctr = self.total_num_filters()
-            # # Make sure that there are no duplicate filters
-            # assert len(set(prune_targets)) == len(prune_targets), [
-            #     x for x in Counter(prune_targets).items() if x[1] > 1
-            # ]
-            # for layer_index, filter_index in prune_targets:  # 하나씩 꺼내서 자르기 시작
-            #     model = prune_conv_layer(
-            #         model,
-            #         layer_index,
-            #         filter_index,
-            #         criterion=self.args.method_type,
-            #         cuda_flag=self.args.cuda,
-            #     )
-
-            #     # Assert that one filter is pruned in each step
-            #     ctr -= 1
-            #     assert ctr == self.total_num_filters()
 
             model = self.model.cpu()
             ctr = self.total_num_filters()
@@ -453,13 +431,8 @@ class PruningFineTuner:
             ), self.total_num_filters()
 
             ratio_pruned_filters = float(self.total_num_filters()) / number_of_filters
-            self.logger.debug(f"Filters pruned: {ratio_pruned_filters}")
-            (
-                test_accuracy,
-                test_loss,
-                flop_value,
-                param_value,
-            ) = self.test()
+            self.logger.debug(f"Pruning ratio: {ratio_pruned_filters}")
+            (test_accuracy, test_loss, flop_value, param_value) = self.test()
 
             self.ratio_pruned_filters = ratio_pruned_filters
             metrics = {
@@ -491,11 +464,11 @@ class PruningFineTuner:
 
         self.ratio_pruned_filters = ratio_pruned_filters
         metrics = {
-            "ratio_pruned": ratio_pruned_filters,
-            "test_acc": test_accuracy,
-            "test_loss": test_loss,
-            "flops": flop_value,
-            "params": param_value,
+            "test/ratio_pruned": ratio_pruned_filters,
+            "test/test_acc": test_accuracy,
+            "test/test_loss": test_loss,
+            "test/flops": flop_value,
+            "test/params": param_value,
         }
         self.df.loc[self.COUNT_ROW] = pd.Series(metrics)
         self.logger.add_scalars(metrics, step=self.COUNT_ROW)
