@@ -131,7 +131,6 @@ class PruningFineTuner:
                 momentum=self.args.momentum,
                 weight_decay=self.args.weight_decay,
             )
-            # optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr)
         scheduler = optim.lr_scheduler.StepLR(
             optimizer, step_size=max(1, epochs // 4), gamma=0.2
         )
@@ -202,16 +201,11 @@ class PruningFineTuner:
         self.train_loss
 
     def train_batch(self, optimizer, batch_idx, batch, label, rank_filters):
-        # self.logger.info(
-        #     f"Step: [{batch_idx * len(batch)}/{len(self.train_loader.dataset)} ({100.0 * batch_idx / len(self.train_loader):.0f}%)]"
-        # )
         self.model.train()
         self.model.zero_grad()
         if optimizer is not None:
             optimizer.zero_grad()
 
-        # with torch.enable_grad():
-        # output = self.model(batch)
         output = self.model(batch)
 
         if rank_filters:  # for pruning
@@ -219,7 +213,6 @@ class PruningFineTuner:
             if (
                 self.args.method_type == "lrp" or self.args.method_type == "weight"
             ):  # lrp_based
-                # with torch.enable_grad():
                 output = self.wrapper_model(batch)
 
                 # self.logger.info("Computing LRP")
@@ -289,16 +282,14 @@ class PruningFineTuner:
                 output = self.model(data)
 
             test_loss += self.criterion(output, target).item()
-            # get the index of the max log-probability
+            # Get the index of the max log-probability
             pred = output.data.max(1, keepdim=True)[1]
             correct += pred.eq(target.data.view_as(pred)).cpu().sum()
-            # print(f"True Label: {target},output: {output}")
             ctr += len(pred)
 
         test_loss /= ctr
         test_accuracy = float(correct) / ctr
         self.logger.add_scalars({"test/loss": test_loss, "test/acc": test_accuracy})
-        # self.correct += correct
 
         if self.save_loss:
             sample_batch = (
@@ -363,14 +354,6 @@ class PruningFineTuner:
         # Get the accuracy before pruning
         self.temp = 0
         test_accuracy, test_loss, flop_value, param_value = self.test()
-        # self.logger.add_scalars(
-        #     {
-        #         "test/loss": test_loss,
-        #         "test/acc": test_accuracy,
-        #         "test/flops": flop_value,
-        #         "test/params": param_value,
-        #     }
-        # )
 
         # Make sure all the layers are trainable
         for param in self.model.parameters():
