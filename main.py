@@ -99,7 +99,7 @@ def get_args():
     parser.add_argument(
         "--total-pr",
         type=float,
-        default=9.001 / 10.0,
+        default=4.001 / 10.0,
         help="Total pruning rate",
     )
     parser.add_argument(
