@@ -18,60 +18,56 @@ from lrp_pruning.network import Alexnet, ResNet18, ResNet50, Vgg16
 
 def get_args():
     # Training settings
-    parser = argparse.ArgumentParser(description="PyTorch VGG16 based ImageNet")
+    parser = argparse.ArgumentParser(
+        description="Structured Pruning of Image Classifiers"
+    )
 
     parser.add_argument(
         "--arch",
-        default="vgg16",
+        default="resnet50",
         help="model architecture: resnet18, resnet50, vgg16, alexnet",
+        choices=["resnet18", "resnet50", "vgg16", "alexnet"],
     )
     parser.add_argument(
         "--batch-size",
         type=int,
-        default=128,
+        default=64,
         help="input batch size",
     )
-    parser.add_argument(
-        "--trialnum", type=int, default=1, metavar="N", help="trial number (default: 1)"
-    )
+    parser.add_argument("--trialnum", type=int, default=1, help="trial number")
     parser.add_argument(
         "--epochs",
         type=int,
         default=10,
-        help="number of epochs to train (default: 10)",
+        help="number of epochs to train",
     )
     parser.add_argument(
         "--recovery_epochs",
         type=int,
         default=10,
-        help="number of epochs to train to recover accuracy after pruning (default: 10)",
+        help="number of epochs to train to recover accuracy after pruning",
     )
     parser.add_argument(
         "--lr",
         type=float,
         default=0.1,
-        help="learning rate (default: 0.001)",
+        help="learning rate",
     )
     parser.add_argument(
         "--momentum",
         type=float,
         default=0.9,
-        help="SGD momentum (default: 0.5)",
+        help="SGD momentum",
     )
     parser.add_argument(
         "--weight-decay",
         "--wd",
         type=float,
         default=5e-4,
-        help="weight decay (default: 1e-4)",
+        help="weight decay",
     )
-    parser.add_argument(
-        "--no-cuda", action="store_true", default=False, help="disables CUDA training"
-    )
-    parser.add_argument(
-        "--seed", type=int, default=1, metavar="S", help="random seed (default: 1)"
-    )
-    # parser.add_argument('--relevance', action='store_true', help='Compute relevances')
+    parser.add_argument("--no-cuda", action="store_true", help="disable CUDA training")
+    parser.add_argument("--seed", type=int, default=1, help="random seed")
     parser.add_argument("--norm", action="store_true", help="add normalization")
     parser.add_argument(
         "--resume_from_ckpt",
@@ -80,7 +76,7 @@ def get_args():
         help="Path to pretrained model",
     )
     parser.add_argument("--train", action="store_true", help="training data")
-    parser.add_argument("--prune", action="store_true", help="pruning model")
+    parser.add_argument("--prune", action="store_true", help="prune model")
     parser.add_argument(
         "--method-type",
         type=str,
@@ -110,17 +106,15 @@ def get_args():
         "--pr-step",
         type=float,
         default=0.05,
-        help="Pruning step: 0.05 (5% for each step)",
+        help="Pruning fraction per step",
     )
 
     parser.add_argument(
         "--dataset",
         type=str,
         default="cifar10",
-        help="model architecture selection: cifar10/imagenet",
-    )
-    parser.add_argument(
-        "--save-dir", type=str, default="model", metavar="N", help="saved directory"
+        help="model architecture selection",
+        choices=["cifar10"],
     )
 
     args = parser.parse_args()
