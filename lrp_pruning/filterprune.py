@@ -90,81 +90,6 @@ class FilterPruner:
                         values.cpu() if torch.cuda.is_available() else values
                     )
 
-    def forward(self, x):
-        self.activations = []  # 전체 conv_layer의 activation map 수
-        self.weights = []
-        self.gradients = []
-        self.grad_index = 0
-        # conv layer의 순서 7: 17의미는 7번째 conv layer가 전체에서 17번째에 있다라는 뜻
-        self.activation_to_layer = {}
-
-        activation_index = 0
-        for layer, (name, module) in enumerate(self.model.features._modules.items()):
-            x = module(x)  # 일반적인 forward를 수행하면서..
-            if isinstance(
-                module, torch.nn.modules.conv.Conv2d
-            ):  # conv layer 일때 여기를 지나감
-                x.register_hook(self.compute_rank)
-                if self.args.method_type == "weight":
-                    self.weights.append(module.weight)
-                self.activations.append(x)
-                self.activation_to_layer[activation_index] = layer
-                activation_index += 1
-
-        return self.model.classifier(x.view(x.size(0), -1))
-
-    def compute_rank(self, grad):
-        activation_index = (
-            len(self.activations) - self.grad_index - 1
-        )  # 뒤에서부터 하나씩 끄집어 냄
-        activation = self.activations[activation_index]
-
-        if self.args.method_type == "taylor":
-            values = (
-                torch.sum((activation * grad), dim=0, keepdim=True)
-                .sum(dim=2, keepdim=True)
-                .sum(dim=3, keepdim=True)[0, :, 0, 0]
-                .data
-            )  # P. Molchanov et al., ICLR 2017
-            # Normalize the rank by the filter dimensions
-            values = values / (
-                activation.size(0) * activation.size(2) * activation.size(3)
-            )
-
-        elif self.args.method_type == "grad":
-            values = (
-                torch.sum((grad), dim=0, keepdim=True)
-                .sum(dim=2, keepdim=True)
-                .sum(dim=3, keepdim=True)[0, :, 0, 0]
-                .data
-            )  # # X. Sun et al., ICML 2017
-            # Normalize the rank by the filter dimensions
-            values = values / (
-                activation.size(0) * activation.size(2) * activation.size(3)
-            )
-
-        elif self.args.method_type == "weight":
-            weight = self.weights[activation_index]
-            values = (
-                torch.sum((weight).abs(), dim=1, keepdim=True)
-                .sum(dim=2, keepdim=True)
-                .sum(dim=3, keepdim=True)[:, 0, 0, 0]
-                .data
-            )  # Many publications based on weight and activation(=feature) map
-
-        else:
-            raise ValueError("No criteria")
-
-        if activation_index not in self.filter_ranks:
-            self.filter_ranks[activation_index] = (
-                torch.FloatTensor(activation.size(1)).zero_().cuda()
-                if self.args.cuda
-                else torch.FloatTensor(activation.size(1)).zero_()
-            )
-
-        self.filter_ranks[activation_index] += values
-        self.grad_index += 1
-
     def normalize_ranks_per_layer(self):
         for i in self.filter_ranks:
             if self.args.norm:  # L2-norm for global rescaling
@@ -223,9 +148,10 @@ class FilterPruner:
         # Make sure each filter has only one rank
         assert len(set([x[:2] for x in data])) == len(data)
 
-        filters_to_prune = nsmallest(
-            num, data, itemgetter(2)
-        )  # data list 내에서 가장 작은 수를 num(=512개) 만큼 뽑아서 리스트에 저장
+        # Data list 내에서 가장 작은 수를 num(=512개) 만큼 뽑아서 리스트에 저장
+        filters_to_prune = nsmallest(num, data, itemgetter(2))
         # Make sure the filters are unique
-        assert len(set([x[:2] for x in filters_to_prune])) == num
+        assert (
+            len(set([x[:2] for x in filters_to_prune])) == num
+        ), "The selected filters should be unique"
         return filters_to_prune
