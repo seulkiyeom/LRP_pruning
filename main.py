@@ -70,7 +70,7 @@ def get_args():
     parser.add_argument("--seed", type=int, default=1, help="random seed")
     parser.add_argument("--norm", action="store_true", help="add normalization")
     parser.add_argument(
-        "--resume_from_ckpt",
+        "--resume-from-ckpt",
         type=str,
         default="",
         help="Path to pretrained model",
@@ -99,7 +99,7 @@ def get_args():
     parser.add_argument(
         "--total-pr",
         type=float,
-        default=4.001 / 10.0,
+        default=0.9501,
         help="Total pruning rate",
     )
     parser.add_argument(
