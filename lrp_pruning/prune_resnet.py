@@ -177,6 +177,7 @@ class PruningFineTuner:
             enumerate(self.train_loader),
             desc="pruning" if rank_filters else "train",
             total=len(self.train_loader),
+            miniters=50,
         ):
             if (
                 self.args.limit_train_batches > 0
@@ -206,8 +207,6 @@ class PruningFineTuner:
         if optimizer is not None:
             optimizer.zero_grad()
 
-        output = self.model(batch)
-
         if rank_filters:  # for pruning
             batch.requires_grad = True
             if (
@@ -231,27 +230,23 @@ class PruningFineTuner:
                 )
                 loss = self.criterion(output, label)
 
-                # #Save heatmap
-                # if batch_idx < 10:
-                #     filename = Path(
-                #         f"heatmaps/{args.arch}_trial{args.trialnum:02d}_batch{batch_idx:04d}_iter{epoch_idx:04d}.png")
-                #     if not filename.parent.exists():
-                #         filename.parent.mkdir()
-                #     torchvision.utils.save_image(input_relevance, filename,
-                #                                  normalize=True,
-                #                                  scale_each=True)
             else:
-                with torch.enable_grad():
-                    output = self.pruner.model(batch)
+                output = self.pruner.model(batch)
 
                 loss = self.criterion(output, label)
                 loss.backward()
 
-            self.logger.debug(
-                f"Loss = {loss.item():.3f}, output.sum() = {output.sum():.2f}, grad.sum() = {batch.grad.sum():.2f}, (step = {batch_idx})"
-            )
+                self.pruner.compute_filter_criterion(
+                    self.layer_type, criterion=self.args.method_type
+                )
+
+            if batch_idx % 50 == 0:
+                self.logger.debug(
+                    f"Loss = {loss.item():.3f}, output.sum() = {output.sum():.2f}, grad.sum() = {batch.grad.sum()}, (step = {batch_idx})"
+                )
 
         else:  # for normal training and fine-tuning
+            output = self.model(batch)
             loss = self.criterion(output, label)
             loss.backward()
             optimizer.step()
