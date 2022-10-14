@@ -102,11 +102,17 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10):
+    def __init__(self, block, num_blocks, num_classes=10, miniaturize_conv1=True):
         super(ResNet, self).__init__()
         self.in_planes = 64
 
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = (
+            nn.Conv2d(3, self.in_planes, kernel_size=3, stride=1, padding=1, bias=False)
+            if miniaturize_conv1
+            else nn.Conv2d(
+                3, self.in_planes, kernel_size=7, stride=2, padding=3, bias=False
+            )
+        )
         self.bn1 = nn.BatchNorm2d(64)
         self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
@@ -128,47 +134,50 @@ class ResNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
-        out = F.avg_pool2d(out, 4)
+        out = F.adaptive_avg_pool2d(out, 1)
         out = out.view(out.size(0), -1)
         out = self.fc(out)
         return out
 
 
-def load_imagenet_weights(model, model_name):
+def load_imagenet_weights(model, model_name, miniaturize_conv1):
     state_dict = models.__dict__[model_name](pretrained=True).state_dict()
     state_dict = {k: v for k, v in state_dict.items() if "fc" not in k}
-    # Downsample conv1: We're handling small input resolutions
-    state_dict["conv1.weight"] = F.avg_pool2d(state_dict["conv1.weight"], kernel_size=2)
+    if miniaturize_conv1:
+        # Downsample conv1: We're handling small input resolutions
+        state_dict["conv1.weight"] = F.avg_pool2d(
+            state_dict["conv1.weight"], kernel_size=2
+        )
     model.load_state_dict(state_dict=state_dict, strict=False)
     return model
 
 
-def ResNet18(num_classes=10):
+def ResNet18(num_classes=10, miniaturize_conv1=True):
     # Specialized ResNet18 for low-res inputs
-    net = ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes)
-    net = load_imagenet_weights(net, "resnet18")
+    net = ResNet(BasicBlock, [2, 2, 2, 2], num_classes, miniaturize_conv1)
+    net = load_imagenet_weights(net, "resnet18", miniaturize_conv1)
     return net
 
 
-def ResNet34(num_classes=10):
-    net = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes)
-    net = load_imagenet_weights(net, "resnet32")
+def ResNet34(num_classes=10, miniaturize_conv1=True):
+    net = ResNet(BasicBlock, [3, 4, 6, 3], num_classes, miniaturize_conv1)
+    net = load_imagenet_weights(net, "resnet32", miniaturize_conv1)
     return net
 
 
-def ResNet50(num_classes=10):
-    net = ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes)
-    net = load_imagenet_weights(net, "resnet50")
+def ResNet50(num_classes=10, miniaturize_conv1=True):
+    net = ResNet(Bottleneck, [3, 4, 6, 3], num_classes, miniaturize_conv1)
+    net = load_imagenet_weights(net, "resnet50", miniaturize_conv1)
     return net
 
 
-def ResNet101(num_classes=10):
-    net = ResNet(Bottleneck, [3, 4, 23, 3], num_classes=num_classes)
-    net = load_imagenet_weights(net, "resnet101")
+def ResNet101(num_classes=10, miniaturize_conv1=True):
+    net = ResNet(Bottleneck, [3, 4, 23, 3], num_classes, miniaturize_conv1)
+    net = load_imagenet_weights(net, "resnet101", miniaturize_conv1)
     return net
 
 
-def ResNet152(num_classes=10):
-    net = ResNet(Bottleneck, [3, 8, 36, 3], num_classes=num_classes)
-    net = load_imagenet_weights(net, "resnet152")
+def ResNet152(num_classes=10, miniaturize_conv1=True):
+    net = ResNet(Bottleneck, [3, 8, 36, 3], num_classes, miniaturize_conv1)
+    net = load_imagenet_weights(net, "resnet152", miniaturize_conv1)
     return net
