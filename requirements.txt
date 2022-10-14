@@ -3,3 +3,4 @@ pandas ~= 1.5
 imageio~=2.22
 wandb~=0.13
 coloredlogs~=15.0
+datasetops

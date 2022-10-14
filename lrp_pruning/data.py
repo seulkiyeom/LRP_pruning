@@ -4,17 +4,22 @@ Codes for loading the MNIST data
 from __future__ import absolute_import, division, print_function
 
 import os
+from copy import deepcopy
 from functools import lru_cache
 from pathlib import Path
 
+import datasetops as do
 import imageio
 import numpy
 import pandas as pd
 import torch
 from PIL import Image
+from scipy.io import loadmat
 from torchvision import datasets, transforms
 
 NUM_CLASSES = {
+    "catsanddogs": 2,
+    "oxfordflowers102": 102,
     "cifar10": 10,
     "imagenet": 1000,
 }
@@ -97,7 +102,7 @@ def get_mnist(datapath="../data/mnist/", download=True):
     return train_dataset, test_dataset
 
 
-def get_cifar10(datapath="../../data/", download=True):
+def get_cifar10(datapath="./datasets/", download=True):
     """
     Get CIFAR10 dataset
     """
@@ -135,6 +140,124 @@ def get_cifar10(datapath="../../data/", download=True):
     return train_dataset, test_dataset
 
 
+def get_catsanddogs(datapath="./datasets/", download=True):
+    dataset_path = Path(datapath) / "catsanddogs"
+
+    dataset_url = "https://download.microsoft.com/download/3/E/1/3E1C3F21-ECDB-4869-8368-6DEBA77B919F/kagglecatsanddogs_5340.zip"
+
+    if download:
+        if not dataset_path.exists():
+            datasets.utils.download_and_extract_archive(
+                dataset_url, dataset_path, "catsanddogs.zip"
+            )
+
+    train, test = (
+        do.from_folder_class_data(dataset_path / "PetImages")
+        .named("data", "label")
+        .one_hot("label")
+        .image("data")
+        .shuffle(seed=42)
+        .split([0.7, 0.3])
+    )
+
+    # Restrict the datasets length to match the KMLC-Challenge-1
+    # As described in "Pruning by Explaining: A Novel Criterion for Deep Neural Network Pruning" suplemental material
+    train._ids = train._ids[: 4000 + 4005]
+    test._ids = test._ids[:2023]
+
+    # Apply PyTorch relevant transforms
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+    )
+
+    train_transform = transforms.Compose(
+        [
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            normalize,
+        ]
+    )
+    test_transform = transforms.Compose(
+        [
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            normalize,
+        ]
+    )
+
+    train_ds = train.transform(lambda x: (train_transform(x[0]), x[1])).to_pytorch()
+    test_ds = test.transform(lambda x: (test_transform(x[0]), x[1])).to_pytorch()
+
+    return train_ds, test_ds
+
+
+def get_oxfordflowers102(datapath="./datasets/", download=True):
+    dataset_path = Path(datapath) / "oxfordflowers102"
+
+    images_url = "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/102flowers.tgz"
+    labels_url = "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/imagelabels.mat"
+    splits_url = "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/setid.mat"
+
+    if download:
+        if not dataset_path.exists():
+            datasets.utils.download_and_extract_archive(
+                images_url, dataset_path, dataset_path / "102flowers"
+            )
+            datasets.utils.download_url(labels_url, dataset_path, "imagelabels.mat")
+            datasets.utils.download_url(splits_url, dataset_path, "setid.mat")
+
+    # Parse data
+    labels = list(loadmat(dataset_path / "imagelabels.mat")["labels"].squeeze(0))
+    splits = loadmat(dataset_path / "setid.mat")
+    # In "Pruning by Explaining: A Novel Criterion for Deep Neural Network Pruning" suplemental material
+    # they describe over 2000 training images. I assume, they used the val set for training here as well.
+    train_ids = list(splits["trnid"].squeeze(0)) + list(splits["valid"].squeeze(0))
+    assert len(train_ids) == 2040
+    test_ids = list(splits["tstid"].squeeze(0))
+    assert len(test_ids) == 6149
+
+    # Create loaders
+    image_loader = do.from_folder_data(dataset_path / "102flowers" / "jpg")
+    label_loader = do.Loader(lambda x: (x,))
+    label_loader.extend(labels)
+    ds = do.zipped(image_loader, label_loader).named("data", "labels")
+
+    # Create splits
+    train = deepcopy(ds).one_hot("labels").image("data")
+    test = deepcopy(ds).one_hot("labels").image("data")
+    train._ids = train_ids
+    test._ids = test_ids
+
+    # Apply PyTorch relevant transforms
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+    )
+
+    train_transform = transforms.Compose(
+        [
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            normalize,
+        ]
+    )
+    test_transform = transforms.Compose(
+        [
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            normalize,
+        ]
+    )
+
+    train_ds = train.transform(lambda x: (train_transform(x[0]), x[1])).to_pytorch()
+    test_ds = test.transform(lambda x: (test_transform(x[0]), x[1])).to_pytorch()
+
+    return train_ds, test_ds
+
+
 def get_imagenet(transform=None, root_dir=None):
     if root_dir is None:
         root_dir = "/ssd7/skyeom/data/imagenet"
@@ -170,3 +293,7 @@ def get_imagenet(transform=None, root_dir=None):
     val = ImageNetDatasetValidation(val_transform, root_dir=root_dir)
 
     return train, val
+
+
+if __name__ == "__main__":
+    get_oxfordflowers102()
