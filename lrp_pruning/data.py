@@ -150,11 +150,13 @@ def get_catsanddogs(datapath="./datasets/", download=True):
             datasets.utils.download_and_extract_archive(
                 dataset_url, dataset_path, "catsanddogs.zip"
             )
+            (dataset_path / "PetImages/Dog/Thumbs.db").unlink(missing_ok=True)
+            (dataset_path / "PetImages/Cat/Thumbs.db").unlink(missing_ok=True)
 
     train, test = (
         do.from_folder_class_data(dataset_path / "PetImages")
         .named("data", "label")
-        .one_hot("label")
+        .categorical("label")
         .image("data")
         .shuffle(seed=42)
         .split([0.7, 0.3])
@@ -166,6 +168,15 @@ def get_catsanddogs(datapath="./datasets/", download=True):
     test._ids = test._ids[:2023]
 
     # Apply PyTorch relevant transforms
+    def fix_shape(x):
+        if x.shape[0] == 1:
+            x = x.repeat(3, 1, 1)
+        if x.shape[0] == 4:
+            x = x[:3]
+        assert x.shape[0] == 3
+        assert len(x.shape) == 3
+        return x
+
     normalize = transforms.Normalize(
         mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
     )
@@ -175,6 +186,7 @@ def get_catsanddogs(datapath="./datasets/", download=True):
             transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
+            fix_shape,
             normalize,
         ]
     )
@@ -183,6 +195,7 @@ def get_catsanddogs(datapath="./datasets/", download=True):
             transforms.Resize(256),
             transforms.CenterCrop(224),
             transforms.ToTensor(),
+            fix_shape,
             normalize,
         ]
     )
@@ -208,7 +221,7 @@ def get_oxfordflowers102(datapath="./datasets/", download=True):
             datasets.utils.download_url(labels_url, dataset_path, "imagelabels.mat")
             datasets.utils.download_url(splits_url, dataset_path, "setid.mat")
 
-    # Parse data
+    # Parse labels
     labels = list(loadmat(dataset_path / "imagelabels.mat")["labels"].squeeze(0))
     splits = loadmat(dataset_path / "setid.mat")
     # In "Pruning by Explaining: A Novel Criterion for Deep Neural Network Pruning" suplemental material
@@ -218,6 +231,10 @@ def get_oxfordflowers102(datapath="./datasets/", download=True):
     test_ids = list(splits["tstid"].squeeze(0))
     assert len(test_ids) == 6149
 
+    # Ensure enumeration starts from 0
+    train_ids = [i - 1 for i in train_ids]
+    test_ids = [i - 1 for i in test_ids]
+
     # Create loaders
     image_loader = do.from_folder_data(dataset_path / "102flowers" / "jpg")
     label_loader = do.Loader(lambda x: (x,))
@@ -225,8 +242,8 @@ def get_oxfordflowers102(datapath="./datasets/", download=True):
     ds = do.zipped(image_loader, label_loader).named("data", "labels")
 
     # Create splits
-    train = deepcopy(ds).one_hot("labels").image("data")
-    test = deepcopy(ds).one_hot("labels").image("data")
+    train = deepcopy(ds).categorical("labels").image("data")
+    test = deepcopy(ds).categorical("labels").image("data")
     train._ids = train_ids
     test._ids = test_ids
 
@@ -296,4 +313,4 @@ def get_imagenet(transform=None, root_dir=None):
 
 
 if __name__ == "__main__":
-    get_oxfordflowers102()
+    get_catsanddogs()
