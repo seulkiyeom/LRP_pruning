@@ -42,7 +42,7 @@ class MetricLogger:
             self.logger = logging.getLogger("LRP_pruning")
             logging.basicConfig(level=logging.NOTSET)
             coloredlogs.install(
-                level="DEBUG",
+                level="INFO",
                 fmt="%(levelname)s: %(message)s",
                 level_styles={
                     "debug": {"color": "white", "faint": True},
@@ -58,7 +58,7 @@ class MetricLogger:
         if "wandb" in self.loggers:
             wandb.log({tag: metric}, step=step)
         if "stdout" in self.loggers:
-            self.logger.debug(
+            self.logger.info(
                 f"{tag} {metric:.3f}" + (f" (step {step})" if step else "")
             )
 
