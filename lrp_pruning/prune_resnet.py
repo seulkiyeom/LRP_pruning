@@ -1,3 +1,4 @@
+import os
 from collections import Counter
 from datetime import datetime
 from itertools import groupby
@@ -82,12 +83,17 @@ class PruningFineTuner:
             self.pruner = FilterPruner(updated_model, self.args)
 
     def setup_dataloaders(self):
-        kwargs = {"num_workers": 1, "pin_memory": True} if self.args.cuda else {}
+        kwargs = {"drop_last": True}
+        if self.args.cuda:
+            kwargs["num_workers"] = max(1, min(4, os.cpu_count()))
+            kwargs["pin_memory"] = True
 
         # Data Acquisition
         get_dataset = {
-            "cifar10": dataset.get_cifar10,  # CIFAR-10
-            # 'imagenet': dataset.get_imagenet, # ImageNet
+            "cifar10": dataset.get_cifar10,
+            "catsanddogs": dataset.get_catsanddogs,
+            "oxfordflowers102": dataset.get_oxfordflowers102,
+            # 'imagenet': dataset.get_imagenet,
         }[self.args.dataset.lower()]
         train_dataset, test_dataset = get_dataset()
         self.logger.info(

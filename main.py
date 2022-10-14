@@ -114,7 +114,7 @@ def get_args():
         type=str,
         default="cifar10",
         help="model architecture selection",
-        choices=["cifar10"],
+        choices=["cifar10", "catsanddogs", "oxfordflowers102"],
     )
 
     args = parser.parse_args()
@@ -131,7 +131,9 @@ if __name__ == "__main__":
         "vgg16": Vgg16,
         "resnet18": ResNet18,
         "resnet50": ResNet50,
-    }[args.arch.lower()](NUM_CLASSES[args.dataset])
+    }[args.arch.lower()](
+        NUM_CLASSES[args.dataset], miniaturize_conv1=(args.dataset == "cifar10")
+    )
 
     if args.resume_from_ckpt:
         model.load_state_dict(torch.load(args.resume_from_ckpt))
