@@ -237,6 +237,7 @@ def get_oxfordflowers102(datapath="./datasets/", download=True):
 
     # Create loaders
     image_loader = do.from_folder_data(dataset_path / "102flowers" / "jpg")
+    image_loader._ids = sorted(image_loader._ids)
     label_loader = do.Loader(lambda x: (x,))
     label_loader.extend(labels)
     ds = do.zipped(image_loader, label_loader).named("data", "labels")
