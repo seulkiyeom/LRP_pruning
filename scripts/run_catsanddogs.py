@@ -3,9 +3,9 @@ import subprocess
 model_name = "resnet50"
 for method_type in [
     "lrp",
-    "weight",
-    "taylor",
-    "grad",
+    # "weight",
+    # "taylor",
+    # "grad",
 ]:
     for norm in [
         True,
@@ -17,12 +17,12 @@ for method_type in [
         command = [
             "python", "main.py", "--train", "--prune",
             "--arch", "resnet50",
-            "--dataset", "cifar10",
+            "--dataset", "catsanddogs",
             "--method-type", method_type,
-            "--lr", "0.0025",
-            "--batch-size", "64",
-            "--epochs", "20",
-            "--recovery_epochs", "20",
+            "--lr", "0.0005",
+            "--batch-size", "12",
+            "--epochs", "100",
+            "--recovery_epochs", "50",
         ]
         # fmt: on
         if norm:
