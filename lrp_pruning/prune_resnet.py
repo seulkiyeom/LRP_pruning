@@ -357,8 +357,9 @@ class PruningFineTuner:
         test_accuracy, test_loss, flop_value, param_value = self.test()
 
         # Make sure all the layers are trainable
-        for param in self.model.parameters():
-            param.requires_grad = True
+        # for param in self.model.parameters():
+        #     param.requires_grad = True
+        self.model.train()
 
         number_of_filters = self.total_num_filters()
         num_filters_to_prune_per_iteration = int(number_of_filters * self.args.pr_step)

@@ -25,45 +25,48 @@ def flops_to_string_value(flops):
     return round(flops / 10.0**9, 2)
 
 
-def get_model_parameters_number_value_mask(model, as_string=True):
-    params_num = sum(p.numel() for p in model.parameters())
-    # params_num = sum(p.numel() for p in model.parameters() if p.requires_grad)
-
-    del_param = 0
+def get_model_parameters_number_value_mask(model, as_string=False):
     import torch
     import torch.nn as nn
 
-    for name, module in model.named_modules():
-        if hasattr(module, "module"):  # lrp and weight
-            if isinstance(module.module, nn.Conv2d):
-                del_param += module.module.bias.size(
-                    0
-                )  # need to always remove bias term
-                if hasattr(module, "output_mask"):
-                    n_filter = len(torch.where(module.output_mask == 0)[0])
-                    # print(f'{name}: {n_filter}')
-                    del_param += (
-                        n_filter
-                        * module.module.weight.size(1)
-                        * module.module.weight.size(2)
-                        * module.module.weight.size(3)
+    # params_num = sum(p.numel() for p in model.parameters())
+    prev_output_mask = None
+    conv_count = 0
+    lin_count = 0
+    norm_count = 0
+    for mod in model.modules():
+        if isinstance(mod, nn.BatchNorm2d):
+            norm_count += sum(p.numel() for p in mod.parameters())
+        if isinstance(mod, nn.Linear):
+            lin_count += sum(p.numel() for p in mod.parameters())
+        if isinstance(mod, nn.Conv2d):
+            if hasattr(mod, "output_mask"):
+                n_out_channels = len(torch.where(mod.output_mask == 1)[0])
+                n_in_channels = mod.in_channels
+                if (
+                    prev_output_mask is not None
+                    and prev_output_mask.shape[0] == mod.in_channels
+                ):
+                    n_in_channels = len(torch.where(prev_output_mask == 1)[0])
+                if hasattr(mod, "adapter"):
+                    conv_count += mod.adapter.rank * (n_out_channels + n_in_channels)
+                else:
+                    conv_count += (
+                        n_out_channels
+                        * n_in_channels
+                        * mod.weight.size(2)
+                        * mod.weight.size(3)
                     )
+                prev_output_mask = mod.output_mask
+            else:
+                conv_count += sum(p.numel() for p in mod.parameters())
 
-        elif isinstance(module, nn.Conv2d):  # grad and ICLR
-            if hasattr(module, "output_mask"):
-                n_filter = len(torch.where(module.output_mask == 0)[0])
-                # print(f'{name}: {n_filter}')
-                del_param += (
-                    n_filter
-                    * module.weight.size(1)
-                    * module.weight.size(2)
-                    * module.weight.size(3)
-                )
+    params_num = conv_count + lin_count + norm_count
 
     if not as_string:
-        return params_num - del_param
+        return params_num
 
-    return round((params_num - del_param) / 10**6, 2)
+    return round((params_num) / 10**6, 2)
 
 
 def get_model_parameters_number_value(model, as_string=True):

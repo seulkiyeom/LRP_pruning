@@ -128,6 +128,8 @@ class FilterPruner:
                     v = torch.abs(self.filter_ranks[i])
                 elif self.args.method_type == "grad":  # |grad|
                     v = torch.abs(self.filter_ranks[i])
+                elif self.args.method_type == "lrp":
+                    v = self.filter_ranks[i]
             self.filter_ranks[i] = v.cpu()
 
     def get_prunning_plan(self, num_filters_to_prune):
