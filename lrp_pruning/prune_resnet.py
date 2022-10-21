@@ -301,9 +301,8 @@ class PruningFineTuner:
             self.model = fcm.add_flops_counting_methods(self.model)
             self.model.eval().start_flops_count()
             _ = self.model(sample_batch)
-            flop_value = flop.flops_to_string_value(
-                self.model.compute_average_flops_cost()
-            )
+            flop_value = self.model.compute_average_flops_cost()
+            # flop_value = flop.flops_to_string_value(flop_value)
             param_value = flop.get_model_parameters_number_value_mask(self.model)
             self.model.eval().stop_flops_count()
             self.model = fcm.remove_flops_counting_methods(self.model)
