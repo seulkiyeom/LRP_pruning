@@ -35,7 +35,7 @@ class MetricLogger:
                 project="LRP_pruning",
                 entity="lukashedegaard",
                 name=name_prefix_str
-                + f"{args.arch}_{args.dataset}_{args.method_type}_norm={args.norm}_train={args.train}_prune={args.prune}",
+                + f"{args.arch}_{args.dataset}_{args.method_type}_norm={args.norm}_train={args.train}_prune={args.prune}_seed={args.seed}",
                 config=args,
             )
         self.log_dir = wandb.run.dir if "wandb" in loggers else log_dir
