@@ -17,7 +17,7 @@
     ```
 - (Optionally) create conda environment:
     ```bash
-    conda env create --name LRP_pruning python=3.10
+    conda create --name LRP_pruning python=3.10
     ```
 - Install as editable module
     ```bash
