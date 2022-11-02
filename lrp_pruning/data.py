@@ -152,6 +152,8 @@ def get_catsanddogs(datapath="./datasets/", download=True):
             )
             (dataset_path / "PetImages/Dog/Thumbs.db").unlink(missing_ok=True)
             (dataset_path / "PetImages/Cat/Thumbs.db").unlink(missing_ok=True)
+            # This image isn't loadable with PIL:
+            (dataset_path / "PetImages/Dog/11702.jpg").unlink(missing_ok=True) 
 
     train, test = (
         do.from_folder_class_data(dataset_path / "PetImages")
