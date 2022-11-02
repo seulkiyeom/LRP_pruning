@@ -148,7 +148,7 @@ def get_catsanddogs(datapath="./datasets/", download=True):
     if download:
         if not dataset_path.exists():
             datasets.utils.download_and_extract_archive(
-                dataset_url, dataset_path, "catsanddogs.zip"
+                dataset_url, dataset_path, dataset_path
             )
             (dataset_path / "PetImages/Dog/Thumbs.db").unlink(missing_ok=True)
             (dataset_path / "PetImages/Cat/Thumbs.db").unlink(missing_ok=True)
