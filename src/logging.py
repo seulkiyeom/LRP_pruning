@@ -30,10 +30,11 @@ class MetricLogger:
         if "wandb" in loggers:
             name_prefix_str = ""
             if args.splora:
-                name_prefix_str = f"splora_rank={args.splora_rank}_initrange={args.splora_init_range}_"
+                name_prefix_str = (
+                    f"splora_rank={args.splora_rank}_initrange={args.splora_init_range}_"
+                )
             wandb.init(
-                project="LRP_pruning",
-                entity="lukashedegaard",
+                project="channel-spa-experiments",
                 name=name_prefix_str
                 + f"{args.arch}_{args.dataset}_{args.method_type}_norm={args.norm}_train={args.train}_prune={args.prune}_seed={args.seed}",
                 config=args,
@@ -62,9 +63,7 @@ class MetricLogger:
         if "wandb" in self.loggers:
             wandb.log({tag: metric}, step=step)
         if "stdout" in self.loggers:
-            self.logger.info(
-                f"{tag} {metric:.3f}" + (f" (step {step})" if step else "")
-            )
+            self.logger.info(f"{tag} {metric:.3f}" + (f" (step {step})" if step else ""))
 
     def add_scalars(self, metric_dict, step=None, main_tag=""):
         if "tensorboard" in self.loggers:
