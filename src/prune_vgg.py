@@ -11,11 +11,11 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 
-import lrp_pruning.data as dataset
-from lrp_pruning.flop import flops_to_string, get_model_parameters_number
-from lrp_pruning.flops_counter import add_flops_counting_methods
-from lrp_pruning.lrp import lrp_prune
-from lrp_pruning.prune_layer import prune_conv_layer_sequential
+import src.data as dataset
+from src.flop import flops_to_string, get_model_parameters_number
+from src.flops_counter import add_flops_counting_methods
+from src.lrp import lrp_prune
+from src.prune_layer import prune_conv_layer_sequential
 
 
 def fhook(self, input, output):
@@ -90,16 +90,12 @@ class FilterPruner:
         self.weights = []
         self.gradients = []
         self.grad_index = 0
-        self.activation_to_layer = (
-            {}
-        )  # conv layer의 순서 7: 17의미는 7번째 conv layer가 전체에서 17번째에 있다라는 뜻
+        self.activation_to_layer = {}  # conv layer의 순서 7: 17의미는 7번째 conv layer가 전체에서 17번째에 있다라는 뜻
 
         activation_index = 0
         for layer, (name, module) in enumerate(self.model.features._modules.items()):
             x = module(x)  # 일반적인 forward를 수행하면서..
-            if isinstance(
-                module, torch.nn.modules.conv.Conv2d
-            ):  # conv layer 일때 여기를 지나감
+            if isinstance(module, torch.nn.modules.conv.Conv2d):  # conv layer 일때 여기를 지나감
                 x.register_hook(self.compute_rank)
                 if self.args.method_type == "weight":
                     self.weights.append(module.weight)
@@ -110,9 +106,7 @@ class FilterPruner:
         return self.model.classifier(x.view(x.size(0), -1))
 
     def compute_rank(self, grad):
-        activation_index = (
-            len(self.activations) - self.grad_index - 1
-        )  # 뒤에서부터 하나씩 끄집어 냄
+        activation_index = len(self.activations) - self.grad_index - 1  # 뒤에서부터 하나씩 끄집어 냄
         activation = self.activations[activation_index]
 
         if self.args.method_type == "taylor":
@@ -123,9 +117,7 @@ class FilterPruner:
                 .data
             )  # P. Molchanov et al., ICLR 2017
             # Normalize the rank by the filter dimensions
-            values = values / (
-                activation.size(0) * activation.size(2) * activation.size(3)
-            )
+            values = values / (activation.size(0) * activation.size(2) * activation.size(3))
 
         elif self.args.method_type == "grad":
             values = (
@@ -135,9 +127,7 @@ class FilterPruner:
                 .data
             )  # # X. Sun et al., ICML 2017
             # Normalize the rank by the filter dimensions
-            values = values / (
-                activation.size(0) * activation.size(2) * activation.size(3)
-            )
+            values = values / (activation.size(0) * activation.size(2) * activation.size(3))
 
         elif self.args.method_type == "weight":
             weight = self.weights[activation_index]
@@ -164,17 +154,13 @@ class FilterPruner:
     def normalize_ranks_per_layer(self):
         for i in self.filter_ranks:
 
-            if (
-                self.args.relevance
-            ):  # average over trials - LRP case (this is not normalization !!)
+            if self.args.relevance:  # average over trials - LRP case (this is not normalization !!)
                 v = self.filter_ranks[i]
                 v = v / torch.sum(v)  # torch.sum(v) = total number of dataset
                 self.filter_ranks[i] = v.cpu()
             else:
                 if self.args.norm:  # L2-norm for global rescaling
-                    if (
-                        self.args.method_type == "weight"
-                    ):  # weight & L1-norm (Li et al., ICLR 2017)
+                    if self.args.method_type == "weight":  # weight & L1-norm (Li et al., ICLR 2017)
                         v = self.filter_ranks[i]
                         v = v / torch.sum(v)  # L1
                         # v = v / torch.sqrt(torch.sum(v * v)) #L2
@@ -185,9 +171,7 @@ class FilterPruner:
                         v = torch.abs(self.filter_ranks[i])
                         v = v / torch.sqrt(torch.sum(v * v))
                         self.filter_ranks[i] = v.cpu()
-                    elif (
-                        self.args.method_type == "grad"
-                    ):  # |grad| & L2-norm (Sun et al., ICML 2017)
+                    elif self.args.method_type == "grad":  # |grad| & L2-norm (Sun et al., ICML 2017)
                         v = torch.abs(self.filter_ranks[i])
                         v = v / torch.sqrt(torch.sum(v * v))
                         self.filter_ranks[i] = v.cpu()
@@ -218,9 +202,7 @@ class FilterPruner:
             filters_to_prune_per_layer[lr] = sorted(filters_to_prune_per_layer[lr])
             for i in range(len(filters_to_prune_per_layer[lr])):  # 이거 꽤 중요함!
                 # 앞 뒤 layer를 잘라줘야 하므로 자르기 전에 미리 차감 시켜놓아야됨
-                filters_to_prune_per_layer[lr][i] = (
-                    filters_to_prune_per_layer[lr][i] - i
-                )
+                filters_to_prune_per_layer[lr][i] = filters_to_prune_per_layer[lr][i] - i
 
         filters_to_prune = []
         for lr in filters_to_prune_per_layer:
@@ -236,9 +218,7 @@ class FilterPruner:
                 data.append((self.activation_to_layer[i], j, self.filter_ranks[i][j]))
                 # data 변수에 모든 layer의 모든 filter의 값을 쭈욱 나열 시킨다.
 
-        return nsmallest(
-            num, data, itemgetter(2)
-        )  # data list 내에서 가장 작은 수를 num(=512개) 만큼 뽑아서 리스트에 저장
+        return nsmallest(num, data, itemgetter(2))  # data list 내에서 가장 작은 수를 num(=512개) 만큼 뽑아서 리스트에 저장
 
 
 class PruningFineTuner:
@@ -312,9 +292,7 @@ class PruningFineTuner:
         # self.correct += correct
 
         if self.save_loss:
-            self.test_acc_tot.append(
-                (100.0 * correct).numpy() / len(self.test_loader.dataset)
-            )
+            self.test_acc_tot.append((100.0 * correct).numpy() / len(self.test_loader.dataset))
             self.test_loss_tot.append(test_loss)
             self.test_iter.append(self.niter)
 
@@ -323,15 +301,9 @@ class PruningFineTuner:
             self.model = add_flops_counting_methods(self.model)
             self.model.eval().start_flops_count()
             _ = self.model(sample_batch)
-            self.flop_val.append(
-                flops_to_string(self.model.compute_average_flops_cost())
-            )
+            self.flop_val.append(flops_to_string(self.model.compute_average_flops_cost()))
             self.num_param.append(get_model_parameters_number(self.model))
-            print(
-                "Flops:  {}".format(
-                    flops_to_string(self.model.compute_average_flops_cost())
-                )
-            )
+            print("Flops:  {}".format(flops_to_string(self.model.compute_average_flops_cost())))
             print("Params: " + get_model_parameters_number(self.model))
 
         self.model.train()
@@ -345,9 +317,7 @@ class PruningFineTuner:
             self.train_batch(optimizer, batch_idx, data, target, rank_filters)
 
         if self.save_loss:
-            self.train_loss_tot.append(
-                self.train_loss_batch / len(self.train_loader.dataset)
-            )
+            self.train_loss_tot.append(self.train_loss_batch / len(self.train_loader.dataset))
 
     def train_batch(self, optimizer, batch_idx, batch, label, rank_filters):
         self.model.zero_grad()
@@ -478,9 +448,7 @@ class PruningFineTuner:
         for kk in range(iterations):
             print("Ranking filters.. {}".format(kk))
             self.niter += 1
-            prune_targets = self.get_candidates_to_prune(
-                num_filters_to_prune_per_iteration
-            )
+            prune_targets = self.get_candidates_to_prune(num_filters_to_prune_per_iteration)
             # prune_targets: 잘라야 할 filter들의 1) layer number, 2) filter number가 넘어옴
             layers_pruned = {}
             for layer_index, filter_index in prune_targets:
@@ -498,9 +466,7 @@ class PruningFineTuner:
 
             self.model = model.cuda() if self.args.cuda else model
 
-            message = (
-                str(100 * float(self.total_num_filters()) / number_of_filters) + "%"
-            )
+            message = str(100 * float(self.total_num_filters()) / number_of_filters) + "%"
             print("Filters pruned", str(message))
             self.test()  # 잘리고 나서 test 해봄
             print("Fine tuning to recover from prunning iteration.")
