@@ -7,25 +7,26 @@ for method_type in [
     "taylor",
     "grad",
 ]:
-    for norm in [
-        True,
-        False,
-    ]:
+    # for norm in [True, False]:
+    for norm in [True]:
         if not norm and method_type == "lrp":
             continue
-        # fmt: off
-        command = [
-            "python", "main.py", "--train", "--prune",
-            "--arch", "resnet50",
-            "--dataset", "cifar10",
-            "--method-type", method_type,
-            "--lr", "0.0025",
-            "--batch-size", "64",
-            "--epochs", "20",
-            "--recovery_epochs", "20",
-        ]
-        # fmt: on
-        if norm:
-            command.append("--norm")
+
+        for seed in ["1", "2", "3"]:
+            # fmt: off
+            command = [
+                "python", "main.py", "--train", "--prune",
+                "--arch", "resnet50",
+                "--dataset", "cifar10",
+                "--method-type", method_type,
+                "--lr", "0.0025",
+                "--batch-size", "64",
+                "--epochs", "20",
+                "--recovery_epochs", "20",
+                "--seed", seed,
+            ]
+            # fmt: on
+            if norm:
+                command.append("--norm")
 
         subprocess.call(command)
