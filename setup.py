@@ -28,7 +28,7 @@ def from_file(file_name: str = "requirements.txt", comment_char: str = "#"):
 
 
 setup(
-    name="lrp-pruning",
+    name="channel-spa-experiments",
     version="0.1.0",
     description="Research repository for LRP-based Structured Pruning",
     long_description=long_description(),
