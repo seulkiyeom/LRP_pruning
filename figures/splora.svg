@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="220px" height="133px" viewBox="0 0 220 133" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 63.1 (92452) - https://sketch.com -->
+    <title>SPLoRA@3x</title>
+    <desc>Created with Sketch.</desc>
+    <g id="SPLoRA" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="81" y="55" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="89" y="55" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="97" y="55" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="105" y="55" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="113" y="55" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="121" y="55" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="129" y="55" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="137" y="55" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="113" y="23" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="113" y="31" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="113" y="39" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="113" y="47" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke-opacity="0.198805589" stroke="#000000" fill-opacity="0.8" fill="#FFFFFF" x="113" y="63" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" opacity="0.2" x="41" y="103" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" opacity="0.2" x="49" y="103" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" opacity="0.195040748" x="113" y="87" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" opacity="0.195040748" x="113" y="95" width="8" height="8"></rect>
+        <line x1="82.5" y1="56.5" x2="87.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="82.5" y1="56.5" x2="87.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(85.000000, 59.000000) rotate(-90.000000) translate(-85.000000, -59.000000) "></line>
+        <line x1="90.5" y1="56.5" x2="95.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="90.5" y1="56.5" x2="95.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(93.000000, 59.000000) rotate(-90.000000) translate(-93.000000, -59.000000) "></line>
+        <line x1="98.5" y1="56.5" x2="103.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="98.5" y1="56.5" x2="103.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(101.000000, 59.000000) rotate(-90.000000) translate(-101.000000, -59.000000) "></line>
+        <line x1="106.5" y1="56.5" x2="111.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="106.5" y1="56.5" x2="111.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(109.000000, 59.000000) rotate(-90.000000) translate(-109.000000, -59.000000) "></line>
+        <line x1="114.5" y1="56.5" x2="119.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(117.000000, 59.000000) rotate(-90.000000) translate(-117.000000, -59.000000) "></line>
+        <line x1="122.5" y1="56.5" x2="127.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="122.5" y1="56.5" x2="127.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(125.000000, 59.000000) rotate(-90.000000) translate(-125.000000, -59.000000) "></line>
+        <line x1="130.5" y1="56.5" x2="135.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="130.5" y1="56.5" x2="135.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(133.000000, 59.000000) rotate(-90.000000) translate(-133.000000, -59.000000) "></line>
+        <line x1="138.5" y1="56.5" x2="143.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="138.5" y1="56.5" x2="143.5" y2="61.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(141.000000, 59.000000) rotate(-90.000000) translate(-141.000000, -59.000000) "></line>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="4" y="55" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="4" y="63" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="4" y="71" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="4" y="79" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="4" y="95" width="8" height="8"></rect>
+        <text id="W-⊙m-1" font-family="LMRoman10-BoldItalic, Latin Modern Roman" font-size="12" font-style="italic" font-weight="bold" line-spacing="12" fill="#000000">
+            <tspan x="21" y="132">W  </tspan>
+            <tspan x="47.2165313" y="134.244469" font-family="AppleSymbols, Apple Symbols" font-weight="normal">⊙</tspan>
+            <tspan x="53.9321719" y="132">m  </tspan>
+            <tspan x="75.5801719" y="132.168" font-family="LMRoman10-Bold, Latin Modern Roman">1</tspan>
+            <tspan x="83.1521719" y="132.24" font-family="LMRoman10-Regular, Latin Modern Roman" font-weight="normal"> </tspan>
+        </text>
+        <text id="x" font-family="LMRoman10-BoldItalic, Latin Modern Roman" font-size="12" font-style="italic" font-weight="bold" line-spacing="12" fill="#000000">
+            <tspan x="4" y="53">x</tspan>
+        </text>
+        <text id="y" font-family="LMRoman10-BoldItalic, Latin Modern Roman" font-size="12" font-style="italic" font-weight="bold" line-spacing="12" fill="#000000">
+            <tspan x="209" y="45">y</tspan>
+        </text>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="81" y="23" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="89" y="23" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="97" y="23" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="105" y="23" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="81" y="31" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="89" y="31" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="97" y="31" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="105" y="31" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="81" y="39" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="89" y="39" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="97" y="39" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="105" y="39" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="121" y="23" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="129" y="23" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="137" y="23" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="121" y="31" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="129" y="31" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="137" y="31" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="121" y="39" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="129" y="39" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="137" y="39" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="81" y="47" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="89" y="47" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="97" y="47" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="105" y="47" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="81" y="63" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="89" y="63" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="97" y="63" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="105" y="63" width="8" height="8"></rect>
+        <path id="Line" d="M71.2851972,55.1448104 L80.6704769,58.7733809 L72.1364527,64.1044624 L71.758,60.122 L13.7907484,65.629868 L13.29299,65.67716 L13.1984061,64.6816431 L13.6961645,64.6343511 L71.663,59.126 L71.2851972,55.1448104 Z" fill="#000000" fill-rule="nonzero"></path>
+        <path id="Line" d="M169.409616,85.7132688 L164.617109,94.5609736 L162.323,91.283 L149.286731,100.409616 L148.877115,100.696347 L148.303653,99.8771152 L148.713269,99.590384 L161.75,90.465 L159.455948,87.1878863 L169.409616,85.7132688 Z" fill="#000000" fill-rule="nonzero"></path>
+        <path id="Line" d="M37.8181527,85.7132118 L33.0268782,94.5615839 L30.732,91.285 L17.2867882,100.699815 L16.8772122,100.986603 L16.3036358,100.167451 L16.7132118,99.8806632 L30.158,90.466 L27.8646903,87.1892155 L37.8181527,85.7132118 Z" fill="#000000" fill-rule="nonzero"></path>
+        <path id="Line" d="M169.818153,56.7132118 L165.026878,65.5615839 L162.732,62.285 L149.286788,71.6998152 L148.877212,71.9866034 L148.303636,71.1674514 L148.713212,70.8806632 L162.158,61.466 L159.86469,58.1892155 L169.818153,56.7132118 Z" fill="#000000" fill-rule="nonzero"></path>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="121" y="47" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="129" y="47" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="137" y="47" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="121" y="63" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="129" y="63" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#6236FF" x="137" y="63" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="209" y="47" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="209" y="55" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="209" y="63" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="209" y="71" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="209" y="87" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#FFFFFF" x="209" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="209" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" x="209" y="103" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#37CFAD" x="41" y="71" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" x="49" y="71" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="97" y="87" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="105" y="87" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" x="41" y="79" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" x="49" y="79" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="97" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="105" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="81" y="87" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="89" y="87" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="81" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="89" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" x="41" y="87" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" x="49" y="87" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="121" y="87" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="129" y="87" width="8" height="8"></rect>
+        <text id="⊕" font-family="AppleSymbols, Apple Symbols" font-size="26" font-weight="normal" fill="#000000">
+            <tspan x="166.092773" y="86">⊕</tspan>
+        </text>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="137" y="87" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="121" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="129" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#F7B500" x="137" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" x="41" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" x="49" y="95" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" x="41" y="111" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#44D7B6" x="49" y="111" width="8" height="8"></rect>
+        <line x1="210.5" y1="80.5" x2="215.5" y2="85.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="210.5" y1="80.5" x2="215.5" y2="85.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(213.000000, 83.000000) rotate(-90.000000) translate(-213.000000, -83.000000) "></line>
+        <line x1="114.5" y1="88.5" x2="119.5" y2="93.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="114.5" y1="88.5" x2="119.5" y2="93.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(117.000000, 91.000000) rotate(-90.000000) translate(-117.000000, -91.000000) "></line>
+        <line x1="114.5" y1="96.5" x2="119.5" y2="101.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="114.5" y1="96.5" x2="119.5" y2="101.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(117.000000, 99.000000) rotate(-90.000000) translate(-117.000000, -99.000000) "></line>
+        <line x1="114.5" y1="64.5" x2="119.5" y2="69.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="114.5" y1="64.5" x2="119.5" y2="69.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(117.000000, 67.000000) rotate(-90.000000) translate(-117.000000, -67.000000) "></line>
+        <line x1="114.5" y1="48.5" x2="119.5" y2="53.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="114.5" y1="56.5" x2="119.5" y2="61.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="114.5" y1="48.5" x2="119.5" y2="53.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(117.000000, 51.000000) rotate(-90.000000) translate(-117.000000, -51.000000) "></line>
+        <line x1="114.5" y1="40.5" x2="119.5" y2="45.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="114.5" y1="40.5" x2="119.5" y2="45.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(117.000000, 43.000000) rotate(-90.000000) translate(-117.000000, -43.000000) "></line>
+        <line x1="114.5" y1="32.5" x2="119.5" y2="37.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="114.5" y1="32.5" x2="119.5" y2="37.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(117.000000, 35.000000) rotate(-90.000000) translate(-117.000000, -35.000000) "></line>
+        <line x1="114.5" y1="24.5" x2="119.5" y2="29.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="114.5" y1="24.5" x2="119.5" y2="29.5" id="Line-3" stroke="#0091FF" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(117.000000, 27.000000) rotate(-90.000000) translate(-117.000000, -27.000000) "></line>
+        <path id="Line" d="M76.0431313,90.5276125 L71.0655359,99.2725278 L68.841,95.948 L62.3976017,100.259433 L61.9820438,100.537483 L61.4259445,99.7063668 L61.8415024,99.4283172 L68.285,95.117 L66.0606418,91.7924854 L76.0431313,90.5276125 Z" fill="#000000" fill-rule="nonzero"></path>
+        <path id="Line" d="M202.923579,74.2028439 L197.945984,82.9477592 L195.721,79.623 L189.27805,83.9346644 L188.862492,84.2127141 L188.306392,83.3815982 L188.72195,83.1035486 L195.165,78.792 L192.94109,75.4677168 L202.923579,74.2028439 Z" fill="#000000" fill-rule="nonzero"></path>
+        <line x1="5.5" y1="88.5" x2="10.5" y2="93.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="5.5" y1="88.5" x2="10.5" y2="93.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(8.000000, 91.000000) rotate(-90.000000) translate(-8.000000, -91.000000) "></line>
+        <line x1="42.5" y1="104.5" x2="47.5" y2="109.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="42.5" y1="104.5" x2="47.5" y2="109.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(45.000000, 107.000000) rotate(-90.000000) translate(-45.000000, -107.000000) "></line>
+        <line x1="50.5" y1="104.5" x2="55.5" y2="109.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square"></line>
+        <line x1="50.5" y1="104.5" x2="55.5" y2="109.5" id="Line-3" stroke="#E02020" fill-opacity="0.85" fill="#000000" stroke-linecap="square" transform="translate(53.000000, 107.000000) rotate(-90.000000) translate(-53.000000, -107.000000) "></line>
+        <text id="down" font-family="LMRoman10-Regular, Latin Modern Roman" font-size="6" font-weight="normal" fill="#000000">
+            <tspan x="32" y="131">down</tspan>
+        </text>
+        <text id="row" font-family="LMRoman10-Regular, Latin Modern Roman" font-size="6" font-weight="normal" fill="#000000">
+            <tspan x="66" y="131">row</tspan>
+        </text>
+        <text id="row" font-family="LMRoman10-Regular, Latin Modern Roman" font-size="6" font-weight="normal" fill="#000000">
+            <tspan x="121" y="17">row</tspan>
+        </text>
+        <text id="col" font-family="LMRoman10-Regular, Latin Modern Roman" font-size="6" font-weight="normal" fill="#000000">
+            <tspan x="137" y="116">col</tspan>
+        </text>
+        <text id="col" font-family="LMRoman10-Regular, Latin Modern Roman" font-size="6" font-weight="normal" fill="#000000">
+            <tspan x="142" y="17">col</tspan>
+        </text>
+        <text id="W-⊙1m" font-family="LMRoman10-BoldItalic, Latin Modern Roman" font-size="12" font-style="italic" font-weight="bold" line-spacing="12" fill="#000000">
+            <tspan x="90" y="117">W </tspan>
+            <tspan x="111.248531" y="119.244469" font-family="AppleSymbols, Apple Symbols" font-weight="normal">⊙</tspan>
+            <tspan x="118.348172" y="117.168" font-family="LMRoman10-Bold, Latin Modern Roman">1</tspan>
+            <tspan x="124.864172" y="117">m</tspan>
+            <tspan x="137.248172" y="117.24" font-family="LMRoman10-Regular, Latin Modern Roman" font-weight="normal"> </tspan>
+        </text>
+        <text id="up" font-family="LMRoman10-Regular, Latin Modern Roman" font-size="6" font-weight="normal" fill="#000000">
+            <tspan x="101" y="116">up</tspan>
+        </text>
+        <text id="W⊙(m-m-)" font-family="LMRoman10-BoldItalic, Latin Modern Roman" font-size="12" font-style="italic" font-weight="bold" line-spacing="12" fill="#000000">
+            <tspan x="80" y="17">W</tspan>
+            <tspan x="96.2805312" y="19.2444687" font-family="AppleSymbols, Apple Symbols" font-weight="normal">⊙</tspan>
+            <tspan x="103.380172" y="17.168" font-family="LMRoman10-Bold, Latin Modern Roman">(</tspan>
+            <tspan x="108.360172" y="17">m  m </tspan>
+            <tspan x="147.474172" y="19.764" font-size="9"> </tspan>
+            <tspan x="150.030172" y="17.168" font-family="LMRoman10-Bold, Latin Modern Roman">)</tspan>
+            <tspan x="156.066172" y="17.24" font-family="LMRoman10-Regular, Latin Modern Roman" font-weight="normal"> </tspan>
+        </text>
+        <text id="s" font-family="LMRoman10-Italic, Latin Modern Roman" font-size="8" font-style="italic" font-weight="normal" fill="#000000">
+            <tspan x="90" y="17">s</tspan>
+        </text>
+        <text id="⊤" font-family="AppleSymbols, Apple Symbols" font-size="8" font-weight="normal" fill="#000000">
+            <tspan x="135" y="110">⊤</tspan>
+        </text>
+        <text id="⊤" font-family="AppleSymbols, Apple Symbols" font-size="8" font-weight="normal" fill="#000000">
+            <tspan x="81" y="124">⊤</tspan>
+        </text>
+        <text id="⊤" font-family="AppleSymbols, Apple Symbols" font-size="8" font-weight="normal" fill="#000000">
+            <tspan x="141" y="8">⊤</tspan>
+        </text>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" opacity="0.195040748" x="209" y="79" width="8" height="8"></rect>
+        <rect id="Rectangle" stroke="#000000" fill="#E9E9F1" opacity="0.195040748" x="4" y="87" width="8" height="8"></rect>
+    </g>
+</svg>

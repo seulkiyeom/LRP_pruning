@@ -28,10 +28,14 @@ class MetricLogger:
         if "tensorboard" in loggers:
             self.tb_logger = SummaryWriter(log_dir=log_dir)
         if "wandb" in loggers:
+            name_prefix_str = ""
+            if args.splora:
+                name_prefix_str = f"splora_rank={args.splora_rank}_initrange={args.splora_init_range}_"
             wandb.init(
                 project="LRP_pruning",
                 entity="lukashedegaard",
-                name=f"{args.arch}_{args.dataset}_{args.method_type}_norm={args.norm}_train={args.train}_prune={args.prune}",
+                name=name_prefix_str
+                + f"{args.arch}_{args.dataset}_{args.method_type}_norm={args.norm}_train={args.train}_prune={args.prune}_seed={args.seed}",
                 config=args,
             )
         self.log_dir = wandb.run.dir if "wandb" in loggers else log_dir

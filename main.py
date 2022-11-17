@@ -9,18 +9,18 @@ from __future__ import print_function
 import argparse
 
 import torch
-
-import lrp_pruning.prune_resnet as modules_resnet
-import lrp_pruning.prune_vgg as modules_vgg
-from lrp_pruning.data import NUM_CLASSES
-from lrp_pruning.network import Alexnet, ResNet18, ResNet50, Vgg16
+from time import sleep
+import src.prune_resnet as modules_resnet
+import src.prune_vgg as modules_vgg
+from src.data import NUM_CLASSES
+from src.network import Alexnet, ResNet18, ResNet50, Vgg16
+from sp_adapters import SPLoRA
+from sp_adapters.splora import SPLoRAConv2d
 
 
 def get_args():
     # Training settings
-    parser = argparse.ArgumentParser(
-        description="Structured Pruning of Image Classifiers"
-    )
+    parser = argparse.ArgumentParser(description="Structured Pruning of Image Classifiers")
 
     parser.add_argument(
         "--arch",
@@ -108,13 +108,29 @@ def get_args():
         default=0.05,
         help="Pruning fraction per step",
     )
-
     parser.add_argument(
         "--dataset",
         type=str,
         default="cifar10",
         help="model architecture selection",
         choices=["cifar10", "catsanddogs", "oxfordflowers102"],
+    )
+    parser.add_argument(
+        "--splora",
+        action="store_true",
+        help="Use Structured Pruning Low-rank Adapter (SPLoRA) for training",
+    )
+    parser.add_argument(
+        "--splora-rank",
+        type=int,
+        default=16,
+        help="Bottleneck dimension of Structured Pruning Low-rank Adapter (SPLoRA).",
+    )
+    parser.add_argument(
+        "--splora-init-range",
+        type=float,
+        default=1e-3,
+        help="Initialisation range of Structured Pruning Low-rank Adapter (SPLoRA).",
     )
 
     args = parser.parse_args()
@@ -126,14 +142,16 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
 
-    model = {
-        "alexnet": Alexnet,
-        "vgg16": Vgg16,
-        "resnet18": ResNet18,
-        "resnet50": ResNet50,
-    }[args.arch.lower()](
-        NUM_CLASSES[args.dataset], miniaturize_conv1=(args.dataset == "cifar10")
-    )
+    model = {"alexnet": Alexnet, "vgg16": Vgg16, "resnet18": ResNet18, "resnet50": ResNet50,}[
+        args.arch.lower()
+    ](NUM_CLASSES[args.dataset], miniaturize_conv1=(args.dataset == "cifar10"))
+    if args.splora:
+        model = SPLoRA(
+            model,
+            rank=args.splora_rank,
+            init_range=args.splora_init_range,
+            replacements=[(torch.nn.Conv2d, SPLoRAConv2d)],
+        )
 
     if args.resume_from_ckpt:
         model.load_state_dict(torch.load(args.resume_from_ckpt))
@@ -158,3 +176,5 @@ if __name__ == "__main__":
             f" Total Pruning rate: {args.total_pr}, Pruning step: {args.pr_step}"
         )
         fine_tuner.prune()
+
+    sleep(5)  # Allow logging to finalize uploads
