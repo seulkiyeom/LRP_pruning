@@ -5,4 +5,4 @@ wandb~=0.13
 coloredlogs~=15.0
 datasetops
 tqdm
--e git+https://github.com/LukasHedegaard/structured-pruning-adapters.git@v0.5.1#egg=structured_pruning_adapters
+structured-pruning-adapters
