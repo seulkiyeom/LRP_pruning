@@ -144,43 +144,46 @@ def train(
     train_step=0,
 ):
     model.train()
-
+    num_batches = limit_train_batches if limit_train_batches > 0 else len(dataset)
     optimizer = torch.optim.SGD(
         model.parameters(),
-        lr=lr,
+        lr=lr/10,
         momentum=momentum,
         weight_decay=weight_decay,
     )
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=lr, steps_per_epoch=num_batches, epochs=epochs)
 
-    scheduler = torch.optim.lr_scheduler.StepLR(
-        optimizer, step_size=max(1, epochs // 4), gamma=0.2
-    )
+    # scheduler = torch.optim.lr_scheduler.StepLR(
+    #     optimizer, step_size=max(1, epochs // 4), gamma=0.2
+    # )
 
+    i = 0
     for _ in tqdm(range(epochs), desc=f"{description} (epoch)"):
         for batch_idx, (data, target) in tqdm(
             enumerate(dataset),
             desc=f"{description} (step)",
-            total=limit_train_batches or len(dataset),
+            total=num_batches,
             miniters=1,
         ):
-            if limit_train_batches > 0 and batch_idx >= limit_train_batches:
+            if batch_idx >= num_batches:
                 break
             if torch.cuda.is_available():
-                data, target = data.cuda(), target.cuda()
+                data, target = data.cuda(non_blocking=True), target.cuda(non_blocking=True)
 
             model.zero_grad()
             optimizer.zero_grad()
             pred = model(data)
             loss = criterion(pred, target)
-            if logger is not None:
+            if logger is not None and i %  20 == 0:
+                i += 1
                 logger.add_scalar("train/step", train_step)
                 logger.add_scalar("train/loss", loss.detach().item())
                 logger.add_scalar("train/lr", scheduler.get_last_lr()[0])
             loss.backward()
 
+            scheduler.step()
             train_step += 1
 
-        scheduler.step()
 
     del optimizer
     del scheduler
@@ -206,13 +209,13 @@ def test(
         for batch_idx, (data, target) in tqdm(
             enumerate(dataset),
             desc=f"{description} (step)",
-            total=limit_test_batches or len(dataset),
+            total=limit_test_batches if limit_test_batches > 0 else len(dataset),
             miniters=1,
         ):
             if limit_test_batches > 0 and batch_idx >= limit_test_batches:
                 break
             if torch.cuda.is_available():
-                data, target = data.cuda(), target.cuda()
+                data, target = data.cuda(non_blocking=True), target.cuda(non_blocking=True)
 
             pred = model(data)
             loss += criterion(pred, target).item()
@@ -255,11 +258,13 @@ if __name__ == "__main__":
     }[args.dataset](image_size=image_size)
 
     train_loader = torch.utils.data.DataLoader(
-        dataset=train_ds, batch_size=args.batch_size, shuffle=True
+        dataset=train_ds, batch_size=args.batch_size, shuffle=True,
+        num_workers=8, pin_memory=True
     )
 
     test_loader = torch.utils.data.DataLoader(
-        dataset=test_ds, batch_size=args.batch_size, shuffle=False
+        dataset=test_ds, batch_size=args.batch_size, shuffle=False,
+        num_workers=8, pin_memory=True
     )
 
     num_classes = datasets.NUM_CLASSES[args.dataset]
@@ -297,6 +302,7 @@ if __name__ == "__main__":
 
     if torch.cuda.is_available():
         model = model.cuda()
+        example_input = example_input.cuda(non_blocking=True)
 
     # Prepare pruner
     imp = tp.importance.MagnitudeImportance(p=2)
@@ -322,19 +328,50 @@ if __name__ == "__main__":
 
     # Make initial adaptation to model
     base_macs, base_params = tp.utils.count_ops_and_params(model, example_input)
-    logger.add_scalar("test/macs", base_macs)
-    logger.add_scalar("test/params", base_params)
-    logger.add_scalar("test/sparsity", 1.0)
+    logger.add_scalar("train/macs", base_macs)
+    logger.add_scalar("train/params", base_params)
+    logger.add_scalar("train/sparsity", 1.0)
 
+    # Freeze all but the untrained head
+    for param in model.parameters():
+        param.requires_grad = False
+
+    for param in model.heads.head.parameters():
+        param.requires_grad = True
+
+    # Train the head
     prev_train_step = train(
         model=model,
         dataset=train_loader,
-        epochs=args.init_epochs,
+        epochs=max(1, args.init_epochs // 4),
         lr=args.lr,
         momentum=args.momentum,
         weight_decay=args.weight_decay,
         limit_train_batches=args.limit_train_batches,
-        description="Train before pruning",
+        description="Train head",
+    )
+    test_loss, test_acc = test(
+        model, test_loader, limit_test_batches=args.limit_test_batches
+    )
+    logger.add_scalar("test/acc", test_acc)
+    logger.add_scalar("test/loss", test_loss)
+    logger.add_scalar("train/macs", base_macs)
+    logger.add_scalar("train/params", base_params)
+    logger.add_scalar("train/sparsity", 1.0)
+
+    # Unfreeze all layers
+    for param in model.parameters():
+        param.requires_grad = True
+
+    prev_train_step = train(
+        model=model,
+        dataset=train_loader,
+        epochs=max(1, 3 * args.init_epochs // 4),
+        lr=args.lr,
+        momentum=args.momentum,
+        weight_decay=args.weight_decay,
+        limit_train_batches=args.limit_train_batches,
+        description="Train whole network",
     )
     test_loss, test_acc = test(
         model, test_loader, limit_test_batches=args.limit_test_batches
