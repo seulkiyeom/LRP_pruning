@@ -19,8 +19,10 @@ from torchvision import datasets, transforms
 
 NUM_CLASSES = {
     "catsanddogs": 2,
-    "oxfordflowers102": 102,
     "cifar10": 10,
+    "cifar100": 100,
+    "oxfordflowers102": 102,
+    "stanfordcars": 196,
     "imagenet": 1000,
 }
 
@@ -102,7 +104,7 @@ def get_mnist(datapath="../data/mnist/", download=True):
     return train_dataset, test_dataset
 
 
-def get_cifar10(datapath="./datasets/", download=True):
+def get_cifar10(datapath="./datasets/", download=True, image_size=32):
     """
     Get CIFAR10 dataset
     """
@@ -115,9 +117,7 @@ def get_cifar10(datapath="./datasets/", download=True):
         train=True,
         transform=transforms.Compose(
             [
-                transforms.RandomCrop(32, padding=4),
-                # transforms.Resize(256),
-                # transforms.RandomResizedCrop(224),
+                transforms.RandomResizedCrop(image_size),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 normalize,
@@ -131,7 +131,8 @@ def get_cifar10(datapath="./datasets/", download=True):
         train=False,
         transform=transforms.Compose(
             [
-                # transforms.Resize(224),
+                transforms.Resize(int(256 / 224 * image_size)),
+                transforms.Resize(image_size),
                 transforms.ToTensor(),
                 normalize,
             ]
@@ -140,7 +141,92 @@ def get_cifar10(datapath="./datasets/", download=True):
     return train_dataset, test_dataset
 
 
-def get_catsanddogs(datapath="./datasets/", download=True):
+def get_cifar100(datapath="./datasets/", download=True, image_size=32):
+    """
+    Get CIFAR100 dataset
+    """
+    normalize = transforms.Normalize(
+        mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010]
+    )
+    # Cifar-100 Dataset
+    train_dataset = datasets.CIFAR100(
+        root=datapath,
+        train=True,
+        transform=transforms.Compose(
+            [
+                transforms.RandomResizedCrop(image_size),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        ),
+        download=download,
+    )
+
+    test_dataset = datasets.CIFAR100(
+        root=datapath,
+        train=False,
+        transform=transforms.Compose(
+            [
+                transforms.Resize(int(256 / 224 * image_size)),
+                transforms.CenterCrop(image_size),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        ),
+    )
+    return train_dataset, test_dataset
+
+
+def get_stanfordcars(datapath="./datasets/", download=False, image_size=224):
+    """
+    Get StanfordCars dataset
+
+    NB: Automatic download fails. The dataset can be manually downloaded at
+    https://www.kaggle.com/datasets/eduardo4jesus/stanford-cars-dataset
+
+    The test labels should be places in the root folder and can retrieved at
+    https://github.com/nguyentruonglau/stanford-cars/blob/main/labeldata/cars_test_annos_withlabels.mat
+
+    To comply with the expected structure in torchvision, you also need to
+    1) move the "~/cars_devkit/devkit" folder to "~/devkit".
+    2) move the "~/cars_devkit/cars_train" folder to "~/cars_train".
+    3) move the "~/cars_devkit/cars_test" folder to "~/cars_test".
+    """
+    normalize = transforms.Normalize(
+        mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010]
+    )
+
+    train_dataset = datasets.StanfordCars(
+        root=datapath,
+        split="train",
+        transform=transforms.Compose(
+            [
+                transforms.RandomResizedCrop(image_size),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        ),
+        download=download,
+    )
+
+    test_dataset = datasets.StanfordCars(
+        root=datapath,
+        split="test",
+        transform=transforms.Compose(
+            [
+                transforms.Resize(int(256 / 224 * image_size)),
+                transforms.CenterCrop(image_size),
+                transforms.ToTensor(),
+                normalize,
+            ]
+        ),
+    )
+    return train_dataset, test_dataset
+
+
+def get_catsanddogs(datapath="./datasets/", download=True, image_size=224):
     dataset_path = Path(datapath) / "catsanddogs"
 
     dataset_url = "https://download.microsoft.com/download/3/E/1/3E1C3F21-ECDB-4869-8368-6DEBA77B919F/kagglecatsanddogs_5340.zip"
@@ -153,8 +239,8 @@ def get_catsanddogs(datapath="./datasets/", download=True):
             (dataset_path / "PetImages/Dog/Thumbs.db").unlink(missing_ok=True)
             (dataset_path / "PetImages/Cat/Thumbs.db").unlink(missing_ok=True)
             # Images not loadable with PIL:
-            (dataset_path / "PetImages/Dog/11702.jpg").unlink(missing_ok=True) 
-            (dataset_path / "PetImages/Cat/666.jpg").unlink(missing_ok=True) 
+            (dataset_path / "PetImages/Dog/11702.jpg").unlink(missing_ok=True)
+            (dataset_path / "PetImages/Cat/666.jpg").unlink(missing_ok=True)
 
     train, test = (
         do.from_folder_class_data(dataset_path / "PetImages")
@@ -186,7 +272,7 @@ def get_catsanddogs(datapath="./datasets/", download=True):
 
     train_transform = transforms.Compose(
         [
-            transforms.RandomResizedCrop(224),
+            transforms.RandomResizedCrop(image_size),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             fix_shape,
@@ -195,8 +281,8 @@ def get_catsanddogs(datapath="./datasets/", download=True):
     )
     test_transform = transforms.Compose(
         [
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
+            transforms.Resize(int(256 / 224 * image_size)),
+            transforms.CenterCrop(image_size),
             transforms.ToTensor(),
             fix_shape,
             normalize,
@@ -209,7 +295,7 @@ def get_catsanddogs(datapath="./datasets/", download=True):
     return train_ds, test_ds
 
 
-def get_oxfordflowers102(datapath="./datasets/", download=True):
+def get_oxfordflowers102(datapath="./datasets/", download=True, image_size=224):
     dataset_path = Path(datapath) / "oxfordflowers102"
 
     images_url = "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/102flowers.tgz"
@@ -258,7 +344,7 @@ def get_oxfordflowers102(datapath="./datasets/", download=True):
 
     train_transform = transforms.Compose(
         [
-            transforms.RandomResizedCrop(224),
+            transforms.RandomResizedCrop(image_size),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
@@ -266,8 +352,8 @@ def get_oxfordflowers102(datapath="./datasets/", download=True):
     )
     test_transform = transforms.Compose(
         [
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
+            transforms.Resize(int(256 / 224 * image_size)),
+            transforms.CenterCrop(image_size),
             transforms.ToTensor(),
             normalize,
         ]
