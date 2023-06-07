@@ -96,7 +96,9 @@ class PruningFineTuner:
             # 'imagenet': dataset.get_imagenet,
         }[self.args.dataset.lower()]
         train_dataset, test_dataset = get_dataset()
-        self.logger.info(f"train_dataset:{len(train_dataset)}, test_dataset:{len(test_dataset)}")
+        self.logger.info(
+            f"train_dataset:{len(train_dataset)}, test_dataset:{len(test_dataset)}"
+        )
 
         # Data Loader (Input Pipeline)
         self.train_loader = torch.utils.data.DataLoader(
@@ -135,7 +137,9 @@ class PruningFineTuner:
                 momentum=self.args.momentum,
                 weight_decay=self.args.weight_decay,
             )
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=max(1, epochs // 4), gamma=0.2)
+        scheduler = optim.lr_scheduler.StepLR(
+            optimizer, step_size=max(1, epochs // 4), gamma=0.2
+        )
 
         for i in range(epochs):
             self.logger.add_scalar("train/epoch", i)
@@ -181,14 +185,19 @@ class PruningFineTuner:
             total=len(self.train_loader),
             miniters=50,
         ):
-            if self.args.limit_train_batches > 0 and batch_idx > self.args.limit_train_batches:
+            if (
+                self.args.limit_train_batches > 0
+                and batch_idx > self.args.limit_train_batches
+            ):
                 break
             if self.args.cuda:
                 data, target = data.cuda(), target.cuda()
             # data, target = Variable(data), Variable(target)
             self.train_batch(optimizer, batch_idx, data, target, rank_filters)
 
-        if self.save_loss and not rank_filters:  # save train_loss only during fine-tuning
+        if (
+            self.save_loss and not rank_filters
+        ):  # save train_loss only during fine-tuning
             self.dt.loc[self.training_epoch] = pd.Series(
                 {
                     "ratio_pruned": self.ratio_pruned_filters,
@@ -206,7 +215,9 @@ class PruningFineTuner:
 
         if rank_filters:  # for pruning
             batch.requires_grad = True
-            if self.args.method_type == "lrp" or self.args.method_type == "weight":  # lrp_based
+            if (
+                self.args.method_type == "lrp" or self.args.method_type == "weight"
+            ):  # lrp_based
                 output = self.wrapper_model(batch)
 
                 # self.logger.info("Computing LRP")
@@ -220,7 +231,9 @@ class PruningFineTuner:
                 lrp_anchor = output * T / (output * T).sum(dim=1, keepdim=True)
                 output.backward(lrp_anchor, retain_graph=True)
 
-                self.pruner.compute_filter_criterion(self.layer_type, criterion=self.args.method_type)
+                self.pruner.compute_filter_criterion(
+                    self.layer_type, criterion=self.args.method_type
+                )
                 loss = self.criterion(output, label)
 
             else:
@@ -229,7 +242,9 @@ class PruningFineTuner:
                 loss = self.criterion(output, label)
                 loss.backward()
 
-                self.pruner.compute_filter_criterion(self.layer_type, criterion=self.args.method_type)
+                self.pruner.compute_filter_criterion(
+                    self.layer_type, criterion=self.args.method_type
+                )
 
             if batch_idx % 50 == 0:
                 self.logger.debug(
@@ -254,7 +269,10 @@ class PruningFineTuner:
         ctr = 0
 
         for batch_idx, (data, target) in enumerate(self.test_loader):
-            if self.args.limit_test_batches > 0 and batch_idx > self.args.limit_test_batches:
+            if (
+                self.args.limit_test_batches > 0
+                and batch_idx > self.args.limit_test_batches
+            ):
                 break
             if self.args.cuda:
                 data, target = data.cuda(), target.cuda()
@@ -288,7 +306,9 @@ class PruningFineTuner:
             param_value = flop.get_model_parameters_number_value_mask(self.model)
             self.model.eval().stop_flops_count()
             self.model = fcm.remove_flops_counting_methods(self.model)
-            self.logger.add_scalars({"test/flops": flop_value, "test/params": param_value})
+            self.logger.add_scalars(
+                {"test/flops": flop_value, "test/params": param_value}
+            )
 
             return test_accuracy, test_loss, flop_value, param_value
 
@@ -312,7 +332,9 @@ class PruningFineTuner:
 
         for j in range(len(list(self.wrapper_model.modules()))):
             wrapper_module = next(wrapper_model)
-            if hasattr(wrapper_module, "module") and isinstance(wrapper_module.module, nn.Conv2d):
+            if hasattr(wrapper_module, "module") and isinstance(
+                wrapper_module.module, nn.Conv2d
+            ):
                 # print(f"wrapper: {wrapper_module.module}")
                 for i in range(len(list(self.model.modules()))):
                     my_module = next(my_model)
@@ -346,7 +368,9 @@ class PruningFineTuner:
         self.ratio_pruned_filters = 1.0
         results_file = f"{self.logger.log_dir}/scenario1_results_{self.args.dataset}_{self.args.arch}_{self.args.method_type}_trial{self.args.trialnum:02d}.csv"
         results_file_train = f"{self.logger.log_dir}/scenario1_train_{self.args.dataset}_{self.args.arch}_{self.args.method_type}_trial{self.args.trialnum:02d}.csv"
-        self.df = pd.DataFrame(columns=["ratio_pruned", "test_acc", "test_loss", "flops", "params"])
+        self.df = pd.DataFrame(
+            columns=["ratio_pruned", "test_acc", "test_loss", "flops", "params"]
+        )
         self.dt = pd.DataFrame(columns=["ratio_pruned", "train_loss"])
         self.df.loc[self.COUNT_ROW] = pd.Series(
             {
@@ -374,7 +398,8 @@ class PruningFineTuner:
             ]
 
             grouped_targets = [
-                (k, [v for _, v in w]) for k, w in groupby(sorted(prune_targets), lambda x: x[0])
+                (k, [v for _, v in w])
+                for k, w in groupby(sorted(prune_targets), lambda x: x[0])
             ]
             self.logger.info(f"Layers to be pruned: {grouped_targets}")
             for layer_index, filter_inds in grouped_targets:

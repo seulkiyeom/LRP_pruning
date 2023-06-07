@@ -7,20 +7,23 @@
 from __future__ import print_function
 
 import argparse
+from time import sleep
 
 import torch
-from time import sleep
+from sp_adapters import SPLoRA
+from sp_adapters.splora import SPLoRAConv2d
+
 import src.prune_resnet as modules_resnet
 import src.prune_vgg as modules_vgg
 from src.data import NUM_CLASSES
 from src.network import Alexnet, ResNet18, ResNet50, Vgg16
-from sp_adapters import SPLoRA
-from sp_adapters.splora import SPLoRAConv2d
 
 
 def get_args():
     # Training settings
-    parser = argparse.ArgumentParser(description="Structured Pruning of Image Classifiers")
+    parser = argparse.ArgumentParser(
+        description="Structured Pruning of Image Classifiers"
+    )
 
     parser.add_argument(
         "--arch",
@@ -142,9 +145,14 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
 
-    model = {"alexnet": Alexnet, "vgg16": Vgg16, "resnet18": ResNet18, "resnet50": ResNet50,}[
-        args.arch.lower()
-    ](NUM_CLASSES[args.dataset], miniaturize_conv1=(args.dataset == "cifar10"))
+    model = {
+        "alexnet": Alexnet,
+        "vgg16": Vgg16,
+        "resnet18": ResNet18,
+        "resnet50": ResNet50,
+    }[args.arch.lower()](
+        NUM_CLASSES[args.dataset], miniaturize_conv1=(args.dataset == "cifar10")
+    )
     if args.splora:
         model = SPLoRA(
             model,
