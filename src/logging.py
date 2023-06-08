@@ -93,5 +93,8 @@ class MetricLogger:
     def debug(self, msg):
         self.logger.debug(msg)
 
-    def close(self):
-        self.tb_logger.close()
+    def close(self, exit_code=0):
+        if "tensorboard" in self.loggers:
+            self.tb_logger.close()
+        if "wandb" in self.loggers:
+            wandb.finish(exit_code=exit_code)
