@@ -419,7 +419,7 @@ if __name__ == "__main__":
             prev_train_step = train(
                 model=model,
                 dataset=train_loader,
-                epochs=args.init_epochs,
+                epochs=args.recovery_epochs,
                 lr=args.lr,
                 momentum=args.momentum,
                 weight_decay=args.weight_decay,
