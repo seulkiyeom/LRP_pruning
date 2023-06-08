@@ -11,6 +11,9 @@ from tqdm import tqdm
 import src.data as datasets
 from src.logging import MetricLogger
 
+import logging
+logging.getLogger("wandb").setLevel(logging.WARNING)
+
 
 def get_args():
     # Training settings
@@ -157,7 +160,6 @@ def train(
     #     optimizer, step_size=max(1, epochs // 4), gamma=0.2
     # )
 
-    i = 0
     for _ in tqdm(range(epochs), desc=f"{description} (epoch)"):
         for batch_idx, (data, target) in tqdm(
             enumerate(dataset),
@@ -174,8 +176,7 @@ def train(
             optimizer.zero_grad()
             pred = model(data)
             loss = criterion(pred, target)
-            if logger is not None and i %  20 == 0:
-                i += 1
+            if logger is not None and train_step % 20 == 0:
                 logger.add_scalar("train/step", train_step)
                 logger.add_scalar("train/loss", loss.detach().item())
                 logger.add_scalar("train/lr", scheduler.get_last_lr()[0])
@@ -343,7 +344,7 @@ if __name__ == "__main__":
     prev_train_step = train(
         model=model,
         dataset=train_loader,
-        epochs=max(1, args.init_epochs // 4),
+        epochs=max(1, args.init_epochs // 2),
         lr=args.lr,
         momentum=args.momentum,
         weight_decay=args.weight_decay,
@@ -366,7 +367,7 @@ if __name__ == "__main__":
     prev_train_step = train(
         model=model,
         dataset=train_loader,
-        epochs=max(1, 3 * args.init_epochs // 4),
+        epochs=max(1, args.init_epochs // 2),
         lr=args.lr,
         momentum=args.momentum,
         weight_decay=args.weight_decay,
