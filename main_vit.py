@@ -142,16 +142,19 @@ def train(
     criterion=torch.nn.CrossEntropyLoss(),
     logger=None,
     train_step=0,
+    clip_norm=1.0,
 ):
     model.train()
     num_batches = limit_train_batches if limit_train_batches > 0 else len(dataset)
     optimizer = torch.optim.SGD(
         model.parameters(),
-        lr=lr/10,
+        lr=lr,
         momentum=momentum,
         weight_decay=weight_decay,
     )
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=lr, steps_per_epoch=num_batches, epochs=epochs)
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        optimizer, max_lr=lr, steps_per_epoch=num_batches, epochs=epochs
+    )
 
     # scheduler = torch.optim.lr_scheduler.StepLR(
     #     optimizer, step_size=max(1, epochs // 4), gamma=0.2
@@ -168,22 +171,25 @@ def train(
             if batch_idx >= num_batches:
                 break
             if torch.cuda.is_available():
-                data, target = data.cuda(non_blocking=True), target.cuda(non_blocking=True)
+                data, target = data.cuda(non_blocking=True), target.cuda(
+                    non_blocking=True
+                )
 
             model.zero_grad()
             optimizer.zero_grad()
             pred = model(data)
             loss = criterion(pred, target)
-            if logger is not None and i %  20 == 0:
+            if logger is not None and i % 20 == 0:
                 i += 1
                 logger.add_scalar("train/step", train_step)
                 logger.add_scalar("train/loss", loss.detach().item())
                 logger.add_scalar("train/lr", scheduler.get_last_lr()[0])
             loss.backward()
-
+            if clip_norm > 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), clip_norm)
+            optimizer.step()
             scheduler.step()
             train_step += 1
-
 
     del optimizer
     del scheduler
@@ -215,7 +221,9 @@ def test(
             if limit_test_batches > 0 and batch_idx >= limit_test_batches:
                 break
             if torch.cuda.is_available():
-                data, target = data.cuda(non_blocking=True), target.cuda(non_blocking=True)
+                data, target = data.cuda(non_blocking=True), target.cuda(
+                    non_blocking=True
+                )
 
             pred = model(data)
             loss += criterion(pred, target).item()
@@ -258,13 +266,19 @@ if __name__ == "__main__":
     }[args.dataset](image_size=image_size)
 
     train_loader = torch.utils.data.DataLoader(
-        dataset=train_ds, batch_size=args.batch_size, shuffle=True,
-        num_workers=8, pin_memory=True
+        dataset=train_ds,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=8,
+        pin_memory=True,
     )
 
     test_loader = torch.utils.data.DataLoader(
-        dataset=test_ds, batch_size=args.batch_size, shuffle=False,
-        num_workers=8, pin_memory=True
+        dataset=test_ds,
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=8,
+        pin_memory=True,
     )
 
     num_classes = datasets.NUM_CLASSES[args.dataset]
