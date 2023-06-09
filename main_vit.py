@@ -159,10 +159,6 @@ def train(
         optimizer, max_lr=lr, steps_per_epoch=num_batches, epochs=epochs
     )
 
-    # scheduler = torch.optim.lr_scheduler.StepLR(
-    #     optimizer, step_size=max(1, epochs // 4), gamma=0.2
-    # )
-
     for _ in tqdm(range(epochs), desc=f"{description} (epoch)"):
         for batch_idx, (data, target) in tqdm(
             enumerate(dataset),
@@ -349,97 +345,98 @@ if __name__ == "__main__":
         logger.add_scalar("train/params", base_params)
         logger.add_scalar("train/sparsity", 1.0)
 
-        # Freeze all but the untrained head
-        for param in model.parameters():
-            param.requires_grad = False
+        if args.train:
+            # Freeze all but the untrained head
+            for param in model.parameters():
+                param.requires_grad = False
 
-        for param in model.heads.head.parameters():
-            param.requires_grad = True
+            for param in model.heads.head.parameters():
+                param.requires_grad = True
 
-        # Train the head
-        prev_train_step = train(
-            model=model,
-            dataset=train_loader,
-            epochs=max(1, args.init_epochs // 2),
-            lr=args.lr,
-            momentum=args.momentum,
-            weight_decay=args.weight_decay,
-            limit_train_batches=args.limit_train_batches,
-            description="Train head",
-            logger=logger,
-        )
-        test_loss, test_acc = test(
-            model, test_loader, limit_test_batches=args.limit_test_batches
-        )
-        logger.add_scalar("test/acc", test_acc)
-        logger.add_scalar("test/loss", test_loss)
-        logger.add_scalar("train/macs", base_macs)
-        logger.add_scalar("train/params", base_params)
-        logger.add_scalar("train/sparsity", 1.0)
-
-        # Unfreeze all layers
-        for param in model.parameters():
-            param.requires_grad = True
-
-        prev_train_step = train(
-            model=model,
-            dataset=train_loader,
-            epochs=max(1, args.init_epochs // 2),
-            lr=args.lr,
-            momentum=args.momentum,
-            weight_decay=args.weight_decay,
-            limit_train_batches=args.limit_train_batches,
-            description="Train whole network",
-            train_step=prev_train_step,
-            logger=logger,
-        )
-        test_loss, test_acc = test(
-            model, test_loader, limit_test_batches=args.limit_test_batches
-        )
-        logger.add_scalar("test/acc", test_acc)
-        logger.add_scalar("test/loss", test_loss)
-
-        # Perform iterative pruning and finetuning
-
-        params = base_params
-        while params / base_params > args.target_sparsity:
-            pruner.step()
-
-            # ViT relies on the hidden_dim attribute for forwarding, so we have to modify this variable after pruning
-            if isinstance(
-                model, torchvision.models.vision_transformer.VisionTransformer
-            ):
-                model.hidden_dim = model.conv_proj.out_channels
-
-            macs, params = tp.utils.count_ops_and_params(model, example_input)
-            logger.add_scalar("train/macs", macs)
-            logger.add_scalar("train/params", params)
-            logger.add_scalar("train/sparsity", params / base_params)
-
+            # Train the head
             prev_train_step = train(
                 model=model,
                 dataset=train_loader,
-                epochs=args.recovery_epochs,
+                epochs=max(1, args.init_epochs // 2),
                 lr=args.lr,
                 momentum=args.momentum,
                 weight_decay=args.weight_decay,
                 limit_train_batches=args.limit_train_batches,
-                description=f"Training after pruning ({(params / base_params):.2f})",
+                description="Train head",
                 logger=logger,
-                train_step=prev_train_step,
             )
-
             test_loss, test_acc = test(
-                model,
-                test_loader,
-                limit_test_batches=args.limit_test_batches,
-                description=f"Testing after pruning ({(params / base_params):.2f})",
+                model, test_loader, limit_test_batches=args.limit_test_batches
             )
-            logger.add_scalar("test/loss", test_loss)
             logger.add_scalar("test/acc", test_acc)
-            logger.add_scalar("test/macs", macs)
-            logger.add_scalar("test/params", params)
-            logger.add_scalar("test/sparsity", params / base_params)
+            logger.add_scalar("test/loss", test_loss)
+            logger.add_scalar("train/macs", base_macs)
+            logger.add_scalar("train/params", base_params)
+            logger.add_scalar("train/sparsity", 1.0)
+
+            # Unfreeze all layers
+            for param in model.parameters():
+                param.requires_grad = True
+
+            prev_train_step = train(
+                model=model,
+                dataset=train_loader,
+                epochs=max(1, args.init_epochs // 2),
+                lr=args.lr,
+                momentum=args.momentum,
+                weight_decay=args.weight_decay,
+                limit_train_batches=args.limit_train_batches,
+                description="Train whole network",
+                train_step=prev_train_step,
+                logger=logger,
+            )
+            test_loss, test_acc = test(
+                model, test_loader, limit_test_batches=args.limit_test_batches
+            )
+            logger.add_scalar("test/acc", test_acc)
+            logger.add_scalar("test/loss", test_loss)
+
+        # Perform iterative pruning and finetuning
+        if args.prune:
+            params = base_params
+            while params / base_params > args.target_sparsity:
+                pruner.step()
+
+                # ViT relies on the hidden_dim attribute for forwarding, so we have to modify this variable after pruning
+                if isinstance(
+                    model, torchvision.models.vision_transformer.VisionTransformer
+                ):
+                    model.hidden_dim = model.conv_proj.out_channels
+
+                macs, params = tp.utils.count_ops_and_params(model, example_input)
+                logger.add_scalar("train/macs", macs)
+                logger.add_scalar("train/params", params)
+                logger.add_scalar("train/sparsity", params / base_params)
+
+                prev_train_step = train(
+                    model=model,
+                    dataset=train_loader,
+                    epochs=args.recovery_epochs,
+                    lr=args.lr,
+                    momentum=args.momentum,
+                    weight_decay=args.weight_decay,
+                    limit_train_batches=args.limit_train_batches,
+                    description=f"Training after pruning ({(params / base_params):.2f})",
+                    logger=logger,
+                    train_step=prev_train_step,
+                )
+
+                test_loss, test_acc = test(
+                    model,
+                    test_loader,
+                    limit_test_batches=args.limit_test_batches,
+                    description=f"Testing after pruning ({(params / base_params):.2f})",
+                )
+                logger.add_scalar("test/loss", test_loss)
+                logger.add_scalar("test/acc", test_acc)
+                logger.add_scalar("test/macs", macs)
+                logger.add_scalar("test/params", params)
+                logger.add_scalar("test/sparsity", params / base_params)
     except KeyboardInterrupt as e:
         logger.close(1)
         raise e
