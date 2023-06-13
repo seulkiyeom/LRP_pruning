@@ -388,6 +388,10 @@ if __name__ == "__main__":
             for param in model.parameters():
                 param.requires_grad = True
 
+            # Skip conv layer - we don't have an efficient adapter for
+            # large-kernel, large-stride convs
+            model.conv_proj.weight.requires_grad = False
+
             prev_train_step = train(
                 model=model,
                 dataset=train_loader,
