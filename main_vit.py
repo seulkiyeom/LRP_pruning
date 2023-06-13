@@ -52,6 +52,12 @@ def get_args():
         help="learning rate",
     )
     parser.add_argument(
+        "--prune_lr",
+        type=float,
+        default=0.01,
+        help="learning rate",
+    )
+    parser.add_argument(
         "--momentum",
         type=float,
         default=0.9,
@@ -292,6 +298,10 @@ if __name__ == "__main__":
             pretrained=True,
         )
 
+        arch = args.arch
+        if args.splora:
+            arch += "_splora-" + args.splora_rank
+
         if args.splora:
             model = SPLoRA(
                 model,
@@ -395,6 +405,10 @@ if __name__ == "__main__":
             )
             logger.add_scalar("test/acc", test_acc)
             logger.add_scalar("test/loss", test_loss)
+            torch.save(
+                model.state_dict(),
+                f"{logger.log_dir}/{arch}_{args.dataset}_100%.pth",
+            )
 
         # Perform iterative pruning and finetuning
         if args.prune:
@@ -417,7 +431,7 @@ if __name__ == "__main__":
                     model=model,
                     dataset=train_loader,
                     epochs=args.recovery_epochs,
-                    lr=args.lr,
+                    lr=args.prune_lr,
                     momentum=args.momentum,
                     weight_decay=args.weight_decay,
                     limit_train_batches=args.limit_train_batches,
@@ -437,6 +451,11 @@ if __name__ == "__main__":
                 logger.add_scalar("test/macs", macs)
                 logger.add_scalar("test/params", params)
                 logger.add_scalar("test/sparsity", params / base_params)
+                torch.save(
+                    model.state_dict(),
+                    f"{logger.log_dir}/{arch}_{args.dataset}_{round(params / base_params * 100)}%.pth",
+                )
+
     except KeyboardInterrupt as e:
         logger.close(1)
         raise e
