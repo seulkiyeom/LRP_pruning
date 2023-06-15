@@ -6,7 +6,8 @@ import torch
 import torch_pruning as tp
 import torchvision
 from sp_adapters import SPLoRA
-from sp_adapters.splora import SPLoRAConv2d, SPLoRALinear
+from sp_adapters.splora import SPLoRAConv2d, SPLoRALinear, SPLoRAMultiheadAttention
+from sp_adapters.torch_pruning import customized_pruners, root_module_types
 from tqdm import tqdm
 
 import src.data as datasets
@@ -300,7 +301,7 @@ if __name__ == "__main__":
 
         arch = args.arch
         if args.splora:
-            arch += "_splora-" + args.splora_rank
+            arch += "_splora-" + str(args.splora_rank)
 
         if args.splora:
             model = SPLoRA(
@@ -308,8 +309,9 @@ if __name__ == "__main__":
                 rank=args.splora_rank,
                 init_range=args.splora_init_range,
                 replacements=[
-                    (torch.nn.Conv2d, SPLoRAConv2d),
+                    (torch.nn.MultiheadAttention, SPLoRAMultiheadAttention),
                     (torch.nn.Linear, SPLoRALinear),
+                    # (torch.nn.Conv2d, SPLoRAConv2d), # Skip conv
                 ],
             )
 
@@ -346,7 +348,8 @@ if __name__ == "__main__":
             iterative_steps=iterative_steps,  # number of steps to achieve the target ch_sparsity.
             ignored_layers=[model.heads.head],  # ignore final linear classifier
             round_to=round_to,  # round channels
-            # unwrapped_parameters=[ (model.features[1][1].layer_scale, 0), (model.features[5][4].layer_scale, 0) ],
+            customized_pruners=customized_pruners,
+            root_module_types=root_module_types,
         )
 
         # Make initial adaptation to model
