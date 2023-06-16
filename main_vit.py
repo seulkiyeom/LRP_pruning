@@ -358,6 +358,8 @@ if __name__ == "__main__":
         logger.add_scalar("train/params", base_params)
         logger.add_scalar("train/sparsity", 1.0)
 
+        prev_train_step = 0
+
         if args.train:
             # Freeze all but the untrained head
             for param in model.parameters():
