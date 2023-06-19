@@ -1,12 +1,13 @@
 import argparse
 import logging
+import math
 from datetime import datetime
 
 import torch
 import torch_pruning as tp
 import torchvision
 from sp_adapters import SPLoRA
-from sp_adapters.splora import SPLoRAConv2d, SPLoRALinear, SPLoRAMultiheadAttention
+from sp_adapters.splora import SPLoRALinear, SPLoRAMultiheadAttention
 from sp_adapters.torch_pruning import customized_pruners, root_module_types
 from tqdm import tqdm
 
@@ -240,6 +241,26 @@ def test(
     return avg_loss, acc
 
 
+def count_total_params(model: torch.nn.Module) -> int:
+    return int(sum([math.prod(p.shape) for p in model.parameters()]))
+
+
+def count_trainable_params(model: torch.nn.Module) -> int:
+    return int(sum([math.prod(p.shape) for p in model.parameters() if p.requires_grad]))
+
+
+def count_fused_params(model: torch.nn.Module) -> int:
+    return int(
+        sum(
+            [
+                math.prod(p.shape)
+                for n, p in model.named_parameters()
+                if "adapt" not in n
+            ]
+        )
+    )
+
+
 if __name__ == "__main__":
     args = get_args()
 
@@ -322,6 +343,10 @@ if __name__ == "__main__":
             bias=True,
         ).to(model.heads.head.weight.device)
 
+        # Skip conv layer - we don't have an efficient adapter for
+        # large-kernel, large-stride convs
+        model.conv_proj.weight.requires_grad = False
+
         if args.resume_from_ckpt:
             model.load_state_dict(torch.load(args.resume_from_ckpt))
 
@@ -353,9 +378,13 @@ if __name__ == "__main__":
         )
 
         # Make initial adaptation to model
-        base_macs, base_params = tp.utils.count_ops_and_params(model, example_input)
+        base_macs, _ = tp.utils.count_ops_and_params(model, example_input)
+        base_fused_params = count_fused_params(model)
+        base_trainable_paramse = count_trainable_params(model)
         logger.add_scalar("train/macs", base_macs)
-        logger.add_scalar("train/params", base_params)
+        logger.add_scalar("train/fused_params", count_fused_params(model))
+        logger.add_scalar("train/trainable_params", count_trainable_params(model))
+        logger.add_scalar("train/total_params", count_total_params(model))
         logger.add_scalar("train/sparsity", 1.0)
 
         prev_train_step = 0
@@ -385,16 +414,16 @@ if __name__ == "__main__":
             )
             logger.add_scalar("test/acc", test_acc)
             logger.add_scalar("test/loss", test_loss)
-            logger.add_scalar("train/macs", base_macs)
-            logger.add_scalar("train/params", base_params)
-            logger.add_scalar("train/sparsity", 1.0)
+            logger.add_scalar("test/macs", base_macs)
+            logger.add_scalar("test/fused_params", count_fused_params(model))
+            logger.add_scalar("test/trainable_params", count_trainable_params(model))
+            logger.add_scalar("test/total_params", count_total_params(model))
+            logger.add_scalar("test/sparsity", 1.0)
 
             # Unfreeze all layers
             for param in model.parameters():
                 param.requires_grad = True
 
-            # Skip conv layer - we don't have an efficient adapter for
-            # large-kernel, large-stride convs
             model.conv_proj.weight.requires_grad = False
 
             prev_train_step = train(
@@ -409,11 +438,17 @@ if __name__ == "__main__":
                 train_step=prev_train_step,
                 logger=logger,
             )
+
             test_loss, test_acc = test(
                 model, test_loader, limit_test_batches=args.limit_test_batches
             )
             logger.add_scalar("test/acc", test_acc)
             logger.add_scalar("test/loss", test_loss)
+            logger.add_scalar("test/macs", base_macs)
+            logger.add_scalar("test/fused_params", count_fused_params(model))
+            logger.add_scalar("test/trainable_params", count_trainable_params(model))
+            logger.add_scalar("test/total_params", count_total_params(model))
+            logger.add_scalar("test/sparsity", 1.0)
             torch.save(
                 model.state_dict(),
                 f"{logger.log_dir}/{arch}_{args.dataset}_100%.pth",
@@ -421,20 +456,16 @@ if __name__ == "__main__":
 
         # Perform iterative pruning and finetuning
         if args.prune:
-            params = base_params
-            while params / base_params > args.target_sparsity:
+            fused_params = count_fused_params(model)
+            while count_fused_params(model) / base_fused_params > args.target_sparsity:
                 pruner.step()
+                model.conv_proj.weight.requires_grad = False  # Pruner sets updated requires_grad of updated weight to True
 
                 # ViT relies on the hidden_dim attribute for forwarding, so we have to modify this variable after pruning
                 if isinstance(
                     model, torchvision.models.vision_transformer.VisionTransformer
                 ):
                     model.hidden_dim = model.conv_proj.out_channels
-
-                macs, params = tp.utils.count_ops_and_params(model, example_input)
-                logger.add_scalar("train/macs", macs)
-                logger.add_scalar("train/params", params)
-                logger.add_scalar("train/sparsity", params / base_params)
 
                 prev_train_step = train(
                     model=model,
@@ -444,25 +475,45 @@ if __name__ == "__main__":
                     momentum=args.momentum,
                     weight_decay=args.weight_decay,
                     limit_train_batches=args.limit_train_batches,
-                    description=f"Training after pruning ({(params / base_params):.2f})",
+                    description=f"Training after pruning ({(count_fused_params(model) / base_fused_params):.2f})",
                     logger=logger,
                     train_step=prev_train_step,
+                )
+
+                logger.add_scalar(
+                    "train/macs", tp.utils.count_ops_and_params(model, example_input)[0]
+                )
+                logger.add_scalar("train/fused_params", count_fused_params(model))
+                logger.add_scalar(
+                    "train/trainable_params", count_trainable_params(model)
+                )
+                logger.add_scalar("train/total_params", count_total_params(model))
+                logger.add_scalar(
+                    "train/sparsity", count_fused_params(model) / base_fused_params
                 )
 
                 test_loss, test_acc = test(
                     model,
                     test_loader,
                     limit_test_batches=args.limit_test_batches,
-                    description=f"Testing after pruning ({(params / base_params):.2f})",
+                    description=f"Testing after pruning ({(count_fused_params(model) / base_fused_params):.2f})",
                 )
                 logger.add_scalar("test/loss", test_loss)
                 logger.add_scalar("test/acc", test_acc)
-                logger.add_scalar("test/macs", macs)
-                logger.add_scalar("test/params", params)
-                logger.add_scalar("test/sparsity", params / base_params)
+                logger.add_scalar(
+                    "test/macs", tp.utils.count_ops_and_params(model, example_input)[0]
+                )
+                logger.add_scalar("test/fused_params", count_fused_params(model))
+                logger.add_scalar(
+                    "test/trainable_params", count_trainable_params(model)
+                )
+                logger.add_scalar("test/total_params", count_total_params(model))
+                logger.add_scalar(
+                    "test/sparsity", count_fused_params(model) / base_fused_params
+                )
                 torch.save(
                     model.state_dict(),
-                    f"{logger.log_dir}/{arch}_{args.dataset}_{round(params / base_params * 100)}%.pth",
+                    f"{logger.log_dir}/{arch}_{args.dataset}_{round(fused_params / base_fused_params * 100)}%.pth",
                 )
 
     except KeyboardInterrupt as e:
