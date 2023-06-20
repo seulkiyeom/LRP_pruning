@@ -93,6 +93,8 @@ class PruningFineTuner:
             "cifar10": dataset.get_cifar10,
             "catsanddogs": dataset.get_catsanddogs,
             "oxfordflowers102": dataset.get_oxfordflowers102,
+            "cifar100": dataset.get_cifar100,
+            "standfordcars": dataset.get_stanfordcars,
             # 'imagenet': dataset.get_imagenet,
         }[self.args.dataset.lower()]
         train_dataset, test_dataset = get_dataset()
