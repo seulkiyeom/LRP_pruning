@@ -116,7 +116,13 @@ def get_args():
         type=str,
         default="cifar10",
         help="model architecture selection",
-        choices=["cifar10", "catsanddogs", "oxfordflowers102"],
+        choices=[
+            "cifar10",
+            "catsanddogs",
+            "oxfordflowers102",
+            "cifar100",
+            "stanfordcars",
+        ],
     )
     parser.add_argument(
         "--splora",
@@ -151,7 +157,7 @@ if __name__ == "__main__":
         "resnet18": ResNet18,
         "resnet50": ResNet50,
     }[args.arch.lower()](
-        NUM_CLASSES[args.dataset], miniaturize_conv1=(args.dataset == "cifar10")
+        NUM_CLASSES[args.dataset], miniaturize_conv1=("cifar" in args.dataset)
     )
     if args.splora:
         model = SPLoRA(
