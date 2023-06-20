@@ -21,7 +21,7 @@ for method_type, norm in [
             for splora_rank in ["8", "32"]:
                 # fmt: off
                 command = [
-                    "python", "main.py",
+                    "python", "main_resnet.py",
                     "--train",
                     "--epochs", epochs,
                     "--prune",
