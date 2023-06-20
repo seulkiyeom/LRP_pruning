@@ -459,7 +459,8 @@ if __name__ == "__main__":
             fused_params = count_fused_params(model)
             while count_fused_params(model) / base_fused_params > args.target_sparsity:
                 pruner.step()
-                model.conv_proj.weight.requires_grad = False  # Pruner sets updated requires_grad of updated weight to True
+                # Pruner sets updated requires_grad of updated weight to True
+                model.conv_proj.weight.requires_grad = False
 
                 # ViT relies on the hidden_dim attribute for forwarding, so we have to modify this variable after pruning
                 if isinstance(
