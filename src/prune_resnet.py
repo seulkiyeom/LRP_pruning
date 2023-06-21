@@ -260,7 +260,7 @@ class PruningFineTuner:
             optimizer.step()
 
         if not rank_filters:
-            self.logger.add_scalar("Loss", loss.item(), step=self.training_step)
+            # self.logger.add_scalar("Loss", loss.item(), step=self.training_step)
             self.training_step += 1
         self.train_loss += loss.item()
 
