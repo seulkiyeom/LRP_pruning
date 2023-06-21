@@ -444,6 +444,9 @@ class PruningFineTuner:
             self.dt.to_csv(results_file_train)
 
         self.logger.info("Finished. Going to fine tune the model a bit more")
+        optimizer = optim.SGD(
+            self.model.parameters(), lr=self.args.lr, momentum=self.args.momentum
+        )
         self.train(optimizer, epochs=self.args.recovery_epochs)
         self.dt.to_csv(results_file_train)
 
