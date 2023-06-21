@@ -1,5 +1,9 @@
 import subprocess
 
+base_lr = 1.0
+base_bs = 256
+bs = 32
+
 for seed in ["1"]:  # , "2", "3"]:
     # fmt: off
     command = [
@@ -8,14 +12,15 @@ for seed in ["1"]:  # , "2", "3"]:
         "--splora",
         "--splora-rank", "32",
         "--dataset", "stanfordcars",
-        "--lr", "0.025", #"0.10",
-        "--prune_lr", "0.0025", #"0.01",
-        "--batch-size", "64", #"256",
+        "--lr", str(base_lr * bs / base_bs),
+        "--prune_lr", str(base_lr * bs / base_bs),
+        "--batch-size", str(bs),
         "--init-epochs", "50",
         "--recovery-epochs", "20",
         "--seed", seed,
         "--train",
         "--prune",
+        # "--splora-init-range", "0",
     ]
     # fmt: on
     subprocess.call(command)
