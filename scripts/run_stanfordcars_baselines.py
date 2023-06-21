@@ -14,6 +14,7 @@ for seed in ["1"]:  # ["1", "2", "3"]:
         "--seed", seed,
         "--train",
         "--prune",
+        "--global-pruning",
     ]
     # fmt: on
     subprocess.call(command)

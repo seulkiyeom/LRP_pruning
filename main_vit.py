@@ -124,6 +124,11 @@ def get_args():
         help="Use Structured Pruning Low-rank Adapter (SPLoRA) for training",
     )
     parser.add_argument(
+        "--global-pruning",
+        action="store_true",
+        help="Whether to rank prunable groups globally",
+    )
+    parser.add_argument(
         "--splora-rank",
         type=int,
         default=16,
@@ -367,7 +372,7 @@ if __name__ == "__main__":
             model=model,
             example_inputs=example_input,
             importance=imp,  # Importance Estimator
-            global_pruning=False,  # Please refer to Page 9 of https://www.cs.princeton.edu/courses/archive/spring21/cos598D/lectures/pruning.pdf
+            global_pruning=args.global_pruning,  # Please refer to Page 9 of https://www.cs.princeton.edu/courses/archive/spring21/cos598D/lectures/pruning.pdf
             ch_sparsity=0.95,  # global sparsity for all layers
             # ch_sparsity_dict = {model.conv1: 0.2}, # manually set the sparsity of model.conv1
             iterative_steps=iterative_steps,  # number of steps to achieve the target ch_sparsity.
