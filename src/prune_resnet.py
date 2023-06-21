@@ -416,13 +416,14 @@ class PruningFineTuner:
                 == number_of_filters - (kk + 1) * num_filters_to_prune_per_iteration
             ), self.total_num_filters()
 
-            ratio_pruned_filters = float(self.total_num_filters()) / number_of_filters
-            self.logger.debug(f"Pruning ratio: {ratio_pruned_filters}")
+            self.ratio_pruned_filters = (
+                float(self.total_num_filters()) / number_of_filters
+            )
+            self.logger.debug(f"Pruning ratio: {self.ratio_pruned_filters}")
             (test_accuracy, test_loss, flop_value, param_value) = self.test()
 
-            self.ratio_pruned_filters = ratio_pruned_filters
             metrics = {
-                "test/ratio_pruned": ratio_pruned_filters,
+                "test/ratio_pruned": self.ratio_pruned_filters,
                 "test/acc": test_accuracy,
                 "test/loss": test_loss,
                 "test/flops": flop_value,
@@ -450,9 +451,8 @@ class PruningFineTuner:
         self.train(optimizer, epochs=self.args.recovery_epochs)
         self.dt.to_csv(results_file_train)
 
-        self.ratio_pruned_filters = ratio_pruned_filters
         metrics = {
-            "test/ratio_pruned": ratio_pruned_filters,
+            "test/ratio_pruned": self.ratio_pruned_filters,
             "test/test_acc": test_accuracy,
             "test/test_loss": test_loss,
             "test/flops": flop_value,
