@@ -12,7 +12,7 @@ cfg = {
 # fmt: on
 
 
-def Vgg16(num_classes=10):
+def Vgg16(num_classes=10, *args, **kwargs):
     model = models.__dict__["vgg16"](pretrained=True)
     model.classifier[-1] = nn.Linear(4096, num_classes)
     for param in model.features.parameters():
@@ -102,7 +102,7 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes=10, miniaturize_conv1=True):
+    def __init__(self, block, num_blocks, num_classes=10, miniaturize_conv1=False):
         super(ResNet, self).__init__()
         self.in_planes = 64
 

@@ -14,7 +14,6 @@ from sp_adapters import SPLoRA
 from sp_adapters.splora import SPLoRAConv2d
 
 import src.prune_resnet as modules_resnet
-import src.prune_vgg as modules_vgg
 from src.data import NUM_CLASSES
 from src.network import Alexnet, ResNet18, ResNet50, Vgg16
 
@@ -173,10 +172,13 @@ if __name__ == "__main__":
     if args.cuda:
         model = model.cuda()
 
-    if args.arch.lower() in ["resnet18", "resnet50"]:
-        fine_tuner = modules_resnet.PruningFineTuner(args, model)
-    elif args.arch.lower() in ["vgg16", "alexnet"]:
-        fine_tuner = modules_vgg.PruningFineTuner(args, model)
+    if args.arch.lower() not in ["resnet18", "resnet50"]:
+        assert args.method_type in {
+            "grad",
+            "taylor",
+        }, "Only pruning methods 'taylor' and 'weight' are currently supported for non-resnet architectures."
+
+    fine_tuner = modules_resnet.PruningFineTuner(args, model)
 
     if args.train:
         print(
