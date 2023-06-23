@@ -49,7 +49,12 @@ def get_model_parameters_number_value_mask(model, as_string=False):
                 ):
                     n_in_channels = len(torch.where(prev_output_mask == 1)[0])
                 if hasattr(mod, "adapter"):
-                    conv_count += mod.adapter.rank * (n_out_channels + n_in_channels)
+                    if hasattr(mod.adapter, "rank"):  # SPLoRA
+                        conv_count += mod.adapter.rank * (
+                            n_out_channels + n_in_channels
+                        )
+                    else:  # SPPaRA
+                        conv_count += n_out_channels * n_in_channels
                 else:
                     conv_count += (
                         n_out_channels

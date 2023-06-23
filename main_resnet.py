@@ -10,7 +10,7 @@ import argparse
 from time import sleep
 
 import torch
-from sp_adapters import SPLoRA
+from sp_adapters import SPLoRA, SPPaRA
 from sp_adapters.splora import SPLoRAConv2d
 
 import src.prune_resnet as modules_resnet
@@ -140,6 +140,11 @@ def get_args():
         default=1e-3,
         help="Initialisation range of Structured Pruning Low-rank Adapter (SPLoRA).",
     )
+    parser.add_argument(
+        "--sppara",
+        action="store_true",
+        help="Use Structured Pruning Parallel Residual Adapter (SPPaRA) for training",
+    )
 
     args = parser.parse_args()
     args.cuda = not args.no_cuda and torch.cuda.is_available()
@@ -162,6 +167,12 @@ if __name__ == "__main__":
         model = SPLoRA(
             model,
             rank=args.splora_rank,
+            init_range=args.splora_init_range,
+            replacements=[(torch.nn.Conv2d, SPLoRAConv2d)],
+        )
+    if args.sppara:
+        model = SPPaRA(
+            model,
             init_range=args.splora_init_range,
             replacements=[(torch.nn.Conv2d, SPLoRAConv2d)],
         )
