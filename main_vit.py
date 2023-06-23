@@ -288,6 +288,7 @@ if __name__ == "__main__":
         image_size = 224
 
         train_ds, test_ds = {
+            "cifar10": datasets.get_cifar100,
             "catsanddogs": datasets.get_catsanddogs,
             "cifar100": datasets.get_cifar100,
             "oxfordflowers102": datasets.get_oxfordflowers102,
