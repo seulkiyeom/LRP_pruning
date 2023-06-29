@@ -50,6 +50,13 @@ def get_args():
         default=64,
         help="input batch size",
     )
+    parser.add_argument(
+        "--optimizer",
+        type=str,
+        default="sgd",
+        help="Optimizer type",
+        choices=["sgd", "rmsprop"]
+    )
     parser.add_argument("--trialnum", type=int, default=1, help="trial number")
     parser.add_argument(
         "--epochs",
