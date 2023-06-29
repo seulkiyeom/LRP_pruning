@@ -39,7 +39,7 @@ def get_model_parameters_number_value_mask(model, as_string=False):
             norm_count += sum(p.numel() for p in mod.parameters())
         if isinstance(mod, nn.Linear):
             if hasattr(mod, "adapter") and hasattr(mod.adapter, "rank"):  # SPLoRA
-                lin_count += mod.adapter.rank * sum(mod.shape)
+                lin_count += mod.adapter.rank * sum(mod.weight.shape)
             else:
                 lin_count += sum(p.numel() for p in mod.parameters())
         if isinstance(mod, nn.Conv2d):
