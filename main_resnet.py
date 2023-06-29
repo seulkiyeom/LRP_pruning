@@ -11,11 +11,18 @@ from time import sleep
 
 import torch
 from sp_adapters import SPLoRA, SPPaRA
-from sp_adapters.splora import SPLoRAConv2d, SPLoRALinear
+from sp_adapters.splora import SPLoRAConv2d
 
 import src.prune_resnet as modules_resnet
 from src.data import NUM_CLASSES
-from src.network import Alexnet, ResNet18, ResNet50, Vgg16
+from src.network import (
+    Alexnet,
+    ResNet18,
+    ResNet50,
+    Vgg16,
+    EfficientNetV2_s,
+    EfficientNetV2_m,
+)
 
 
 def get_args():
@@ -27,8 +34,15 @@ def get_args():
     parser.add_argument(
         "--arch",
         default="resnet50",
-        help="model architecture: resnet18, resnet50, vgg16, alexnet",
-        choices=["resnet18", "resnet50", "vgg16", "alexnet"],
+        help="model architecture: resnet18, resnet50, vgg16, alexnet, efficientnet_v2_s, efficientnet_v2_m",
+        choices=[
+            "resnet18",
+            "resnet50",
+            "vgg16",
+            "alexnet",
+            "efficientnet_v2_s",
+            "efficientnet_v2_m",
+        ],
     )
     parser.add_argument(
         "--batch-size",
@@ -160,6 +174,8 @@ if __name__ == "__main__":
         "vgg16": Vgg16,
         "resnet18": ResNet18,
         "resnet50": ResNet50,
+        "efficientnet_v2_s": EfficientNetV2_s,
+        "efficientnet_v2_m": EfficientNetV2_m,
     }[args.arch.lower()](
         NUM_CLASSES[args.dataset], miniaturize_conv1=("cifar" in args.dataset)
     )
