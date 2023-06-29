@@ -164,10 +164,9 @@ if __name__ == "__main__":
         NUM_CLASSES[args.dataset], miniaturize_conv1=("cifar" in args.dataset)
     )
     if args.splora:
-        if args.arch.lower() in {"alexnet", "vgg16"}:
-            replacements = [(torch.nn.Conv2d, SPLoRAConv2d), (torch.nn.Linear, SPLoRALinear)]
-        else:
-            replacements = [(torch.nn.Conv2d, SPLoRAConv2d)]
+        replacements = [(torch.nn.Conv2d, SPLoRAConv2d)]
+        # if args.arch.lower() in {"alexnet", "vgg16"}:
+        #     replacements = [(torch.nn.Conv2d, SPLoRAConv2d), (torch.nn.Linear, SPLoRALinear)]
 
         model = SPLoRA(
             model,
@@ -176,8 +175,8 @@ if __name__ == "__main__":
             replacements=replacements,
         )
         # Reinit last layer, which might have been replaced by SPLoRA
-        if args.arch.lower() in {"alexnet", "vgg16"}:
-            model.classifier[-1] = torch.nn.Linear(4096, NUM_CLASSES[args.dataset])
+        # if args.arch.lower() in {"alexnet", "vgg16"}:
+        #     model.classifier[-1] = torch.nn.Linear(4096, NUM_CLASSES[args.dataset])
 
     if args.sppara:
         model = SPPaRA(
