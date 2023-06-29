@@ -133,12 +133,20 @@ class PruningFineTuner:
 
     def train(self, optimizer=None, epochs=10):
         if optimizer is None:
-            optimizer = optim.SGD(
-                self.model.parameters(),
-                lr=self.args.lr,
-                momentum=self.args.momentum,
-                weight_decay=self.args.weight_decay,
-            )
+            if self.args.optimizer == "rmsprop":
+                optimizer = optim.RMSprop(
+                    self.model.parameters(),
+                    lr=self.args.lr,
+                    momentum=self.args.momentum,
+                    weight_decay=self.args.weight_decay,
+                )
+            else:
+                optimizer = optim.SGD(
+                    self.model.parameters(),
+                    lr=self.args.lr,
+                    momentum=self.args.momentum,
+                    weight_decay=self.args.weight_decay,
+                )
         scheduler = optim.lr_scheduler.StepLR(
             optimizer, step_size=max(1, epochs // 4), gamma=0.2
         )
@@ -438,17 +446,11 @@ class PruningFineTuner:
                 self.copy_mask()  # copy mask from my model to the wrapper model
 
             self.logger.info("Fine tuning to recover from prunning iteration.")
-            optimizer = optim.SGD(
-                self.model.parameters(), lr=self.args.lr, momentum=self.args.momentum
-            )
-            self.train(optimizer, epochs=self.args.recovery_epochs)
+            self.train(epochs=self.args.recovery_epochs)
             self.dt.to_csv(results_file_train)
 
         self.logger.info("Finished. Going to fine tune the model a bit more")
-        optimizer = optim.SGD(
-            self.model.parameters(), lr=self.args.lr, momentum=self.args.momentum
-        )
-        self.train(optimizer, epochs=self.args.recovery_epochs)
+        self.train(epochs=self.args.recovery_epochs)
         self.dt.to_csv(results_file_train)
 
         metrics = {
