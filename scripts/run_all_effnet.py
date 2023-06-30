@@ -16,20 +16,20 @@ for seed in ["1"]:
         # ("lrp", True),
     ]:
         for dataset, lr, bs, epochs, recovery_epocs in [
-            # ("cifar10", str(0.256 / 4096 * 48), "48", "50", "20"),
-            ("stanfordcars", str(0.256 / 4096 * 4), "4", "100", "50"),
-            # ("oxfordflowers102", str(0.256 / 4096 * 4), "4", "120", "50"),
-            # ("catsanddogs", str(0.256 / 4096 * 12), "12", "120", "50"),
-            # ("cifar100", str(0.256 / 4096 * 48), "48", "60", "30"),
+            ("cifar10", str(0.256 / 4096 * 12), "12", "50", "20"),
+            ("stanfordcars", str(0.256 / 4096 * 12), "12", "100", "50"),
+            ("oxfordflowers102", str(0.256 / 4096 * 12), "12", "120", "50"),
+            ("catsanddogs", str(0.256 / 4096 * 12), "12", "120", "50"),
+            ("cifar100", str(0.256 / 4096 * 12), "12", "60", "30"),
         ]:
             # for adapter_config in [None, "8", "32", "sppara"]:
-            for adapter_config in ["32"]:
+            for adapter_config in [None]:
                 # fmt: off
                 command = [
                     "python", "main_resnet.py",
                     # "--train",
                     "--epochs", epochs,
-                    "--prune",
+                    # "--prune",
                     "--recovery_epochs", recovery_epocs,
                     "--arch", model_name,
                     "--dataset", dataset,
