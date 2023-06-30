@@ -15,16 +15,16 @@ cfg = {
 def EfficientNetV2_s(num_classes=10, *args, **kwargs):
     model = models.efficientnet_v2_s(pretrained=True)
     model.classifier[-1] = nn.Linear(model.classifier[-1].in_features, num_classes)
-    for param in model.features.parameters():
-        param.requires_grad = False
+    # for param in model.features.parameters():
+    #     param.requires_grad = False
     return model
 
 
 def EfficientNetV2_m(num_classes=10, *args, **kwargs):
     model = models.efficientnet_v2_m(pretrained=True)
     model.classifier[-1] = nn.Linear(model.classifier[-1].in_features, num_classes)
-    for param in model.features.parameters():
-        param.requires_grad = False
+    # for param in model.features.parameters():
+    #     param.requires_grad = False
     return model
 
 
