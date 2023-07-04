@@ -23,19 +23,19 @@ for seed in ["1"]:
             ("cifar100", str(0.256 / 4096 * 12), "12", "60", "30"),
         ]:
             # for adapter_config in [None, "8", "32", "sppara"]:
-            for adapter_config in [None]:
+            for adapter_config in ["sppara"]:
                 # fmt: off
                 command = [
                     "python", "main_resnet.py",
                     # "--train",
                     "--epochs", epochs,
-                    # "--prune",
+                    "--prune",
                     "--recovery_epochs", recovery_epocs,
                     "--arch", model_name,
                     "--dataset", dataset,
                     "--method-type", method_type,
                     "--lr", lr,
-                    "--optimizer", "rmsprop",
+                    # "--optimizer", "rmsprop",
                     "--batch-size", bs,
                     "--seed", seed,
                 ]
