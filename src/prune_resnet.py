@@ -97,7 +97,11 @@ class PruningFineTuner:
             "stanfordcars": dataset.get_stanfordcars,
             # 'imagenet': dataset.get_imagenet,
         }[self.args.dataset.lower()]
-        train_dataset, test_dataset = get_dataset()
+        train_dataset, test_dataset = get_dataset(
+            image_size=32  # Use downsampling of first conv layer instead of upsampling of image
+            if "cifar" in self.args.dataset and "resnet" in self.args.dataset
+            else 224
+        )
         self.logger.info(
             f"train_dataset:{len(train_dataset)}, test_dataset:{len(test_dataset)}"
         )
