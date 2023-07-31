@@ -16,14 +16,14 @@ for seed in ["1"]:
         # ("lrp", True),
     ]:
         for dataset, lr, bs, epochs, recovery_epocs in [
-            # ("cifar10", str(0.01 / 256 * 48), "48", "50", "20"),
+            ("cifar10", str(0.01 / 256 * 12), "12", "50", "20"),
+            ("cifar100", str(0.01 / 256 * 12), "12", "60", "30"),
             # ("oxfordflowers102", str(0.01 / 256 * 4), "4", "120", "50"),
-            ("stanfordcars", str(0.01 / 256 * 4), "4", "100", "50"),
-            ("catsanddogs", str(0.01 / 256 * 12), "12", "120", "50"),
-            ("cifar100", str(0.01 / 256 * 48), "48", "60", "30"),
+            # ("stanfordcars", str(0.01 / 256 * 4), "4", "100", "50"),
+            # ("catsanddogs", str(0.01 / 256 * 12), "12", "120", "50"),
         ]:
-            # for adapter_config in [None, "8", "32", "sppara"]:
-            for adapter_config in ["sppara"]:
+            for adapter_config in [None, "8", "32", "sppara"]:
+                # for adapter_config in ["sppara"]:
                 # fmt: off
                 command = [
                     "python", "main_resnet.py",

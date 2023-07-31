@@ -18,14 +18,14 @@ for seed in ["1"]:
         # ("lrp", True),
     ]:
         for dataset, lr, bs, epochs, recovery_epocs in [
-            ("stanfordcars", str(lr_base * bs), str(bs), "100", "50"),
-            ("oxfordflowers102", str(lr_base * bs), str(bs), "120", "50"),
-            ("catsanddogs", str(lr_base * bs), str(bs), "120", "50"),
+            # ("stanfordcars", str(lr_base * bs), str(bs), "100", "50"),
+            # ("oxfordflowers102", str(lr_base * bs), str(bs), "120", "50"),
+            # ("catsanddogs", str(lr_base * bs), str(bs), "120", "50"),
             ("cifar100", str(lr_base * bs), str(bs), "60", "30"),
             ("cifar10", str(lr_base * bs), str(bs), "50", "20"),
         ]:
-            # for adapter_config in [None, "8", "32", "sppara"]:
-            for adapter_config in [None]:
+            for adapter_config in [None, "8", "32", "sppara"]:
+                # for adapter_config in [None]:
                 # for adapter_config in ["8"]:
                 # for adapter_config in ["32"]:
                 # for adapter_config in ["sppara"]:
