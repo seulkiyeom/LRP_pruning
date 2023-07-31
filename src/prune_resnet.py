@@ -99,7 +99,7 @@ class PruningFineTuner:
         }[self.args.dataset.lower()]
         train_dataset, test_dataset = get_dataset(
             image_size=32  # Use downsampling of first conv layer instead of upsampling of image
-            if "cifar" in self.args.dataset and "resnet" in self.args.model
+            if "cifar" in self.args.dataset and "resnet" in self.args.arch
             else 224
         )
         self.logger.info(
