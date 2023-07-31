@@ -3,6 +3,8 @@ from pathlib import Path
 
 model_name = "efficientnet_v2_m"
 adapter_init_range = str(1e-4)
+bs = 12
+lr_base = 0.256 / 4096
 
 # for seed in ["1", "2", "3"]:
 for seed in ["1"]:
@@ -16,15 +18,21 @@ for seed in ["1"]:
         # ("lrp", True),
     ]:
         for dataset, lr, bs, epochs, recovery_epocs in [
-            ("cifar10", str(0.256 / 4096 * 12), "12", "50", "20"),
-            ("stanfordcars", str(0.256 / 4096 * 12), "12", "100", "50"),
-            ("oxfordflowers102", str(0.256 / 4096 * 12), "12", "120", "50"),
-            ("catsanddogs", str(0.256 / 4096 * 12), "12", "120", "50"),
-            ("cifar100", str(0.256 / 4096 * 12), "12", "60", "30"),
+            ("stanfordcars", str(lr_base * bs), str(bs), "100", "50"),
+            ("oxfordflowers102", str(lr_base * bs), str(bs), "120", "50"),
+            ("catsanddogs", str(lr_base * bs), str(bs), "120", "50"),
+            ("cifar100", str(lr_base * bs), str(bs), "60", "30"),
+            ("cifar10", str(lr_base * bs), str(bs), "50", "20"),
         ]:
             # for adapter_config in [None, "8", "32", "sppara"]:
-            for adapter_config in ["sppara"]:
+            for adapter_config in [None]:
+                # for adapter_config in ["8"]:
+                # for adapter_config in ["32"]:
+                # for adapter_config in ["sppara"]:
                 # fmt: off
+                if adapter_config is not None:
+                    lr = str(2 * float(lr))
+                
                 command = [
                     "python", "main_resnet.py",
                     # "--train",

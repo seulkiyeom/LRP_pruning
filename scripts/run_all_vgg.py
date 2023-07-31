@@ -17,8 +17,8 @@ for seed in ["1"]:
     ]:
         for dataset, lr, bs, epochs, recovery_epocs in [
             # ("cifar10", str(0.01 / 256 * 48), "48", "50", "20"),
-            ("stanfordcars", str(0.01 / 256 * 4), "4", "100", "50"),
             # ("oxfordflowers102", str(0.01 / 256 * 4), "4", "120", "50"),
+            ("stanfordcars", str(0.01 / 256 * 4), "4", "100", "50"),
             ("catsanddogs", str(0.01 / 256 * 12), "12", "120", "50"),
             ("cifar100", str(0.01 / 256 * 48), "48", "60", "30"),
         ]:
