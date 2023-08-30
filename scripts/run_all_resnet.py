@@ -4,26 +4,21 @@ from pathlib import Path
 model_name = "resnet50"
 adapter_init_range = str(1e-4)
 
-# for seed in ["1", "2", "3"]:
-for seed in ["1"]:
+for seed in ["1", "2", "3"]:
     for method_type, norm in [
-        # ("taylor", True),
-        # ("taylor", False),
+        ("taylor", True),
         ("grad", True),
-        # ("grad", False),
-        # ("weight", True),
-        # ("weight", False),
-        # ("lrp", True),
+        ("weight", True),
+        ("lrp", True),
     ]:
         for dataset, lr, bs, epochs, recovery_epocs in [
-            # ("cifar10", str(0.01 / 256 * 64), "64", "30", "20"),
-            # ("oxfordflowers102", str(0.01 / 256 * 6), "6", "100", "50"),
-            # ("catsanddogs", str(0.01 / 256 * 12), "12", "100", "50"),
-            # ("stanfordcars", str(0.01 / 256 * 8), "8", "100", "50"),
+            ("cifar10", str(0.01 / 256 * 64), "64", "30", "20"),
+            ("oxfordflowers102", str(0.01 / 256 * 6), "6", "100", "50"),
+            ("catsanddogs", str(0.01 / 256 * 12), "12", "100", "50"),
+            ("stanfordcars", str(0.01 / 256 * 8), "8", "200", "50"),
             ("cifar100", str(0.01 / 256 * 48), "48", "60", "30"),
         ]:
-            # for splora_rank in [None, "8", "32", "sppara"]:
-            for adapter_config in ["sppara"]:
+            for adapter_config in [None, "8", "32", "sppara"]:
                 # fmt: off
                 command = [
                     "python", "main_resnet.py",

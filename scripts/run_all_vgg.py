@@ -4,26 +4,21 @@ from pathlib import Path
 model_name = "vgg16"
 adapter_init_range = str(1e-4)
 
-# for seed in ["1", "2", "3"]:
-for seed in ["1"]:
+for seed in ["1", "2", "3"]:
     for method_type, norm in [
-        # ("taylor", True),
-        # ("taylor", False),
+        ("taylor", True),
         ("grad", True),
-        # ("grad", False),
-        # ("weight", True),
-        # ("weight", False),
-        # ("lrp", True),
+        ("weight", True),
+        ("lrp", True),
     ]:
         for dataset, lr, bs, epochs, recovery_epocs in [
             ("cifar10", str(0.01 / 256 * 12), "12", "50", "20"),
             ("cifar100", str(0.01 / 256 * 12), "12", "60", "30"),
-            # ("oxfordflowers102", str(0.01 / 256 * 4), "4", "120", "50"),
-            # ("stanfordcars", str(0.01 / 256 * 4), "4", "100", "50"),
-            # ("catsanddogs", str(0.01 / 256 * 12), "12", "120", "50"),
+            ("oxfordflowers102", str(0.01 / 256 * 4), "4", "120", "50"),
+            ("stanfordcars", str(0.01 / 256 * 4), "4", "100", "50"),
+            ("catsanddogs", str(0.01 / 256 * 12), "12", "120", "50"),
         ]:
             for adapter_config in [None, "8", "32", "sppara"]:
-                # for adapter_config in ["sppara"]:
                 # fmt: off
                 command = [
                     "python", "main_resnet.py",

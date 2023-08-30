@@ -3,39 +3,31 @@ from pathlib import Path
 
 model_name = "efficientnet_v2_m"
 adapter_init_range = str(1e-4)
-bs = 12
+bs = 8
 lr_base = 0.256 / 4096
 
-# for seed in ["1", "2", "3"]:
-for seed in ["1"]:
+for seed in ["1", "2", "3"]:
     for method_type, norm in [
-        # ("taylor", True),
-        # ("taylor", False),
+        ("taylor", True),
         ("grad", True),
-        # ("grad", False),
-        # ("weight", True),
-        # ("weight", False),
-        # ("lrp", True),
+        ("weight", True),
+        ("lrp", True),
     ]:
         for dataset, lr, bs, epochs, recovery_epocs in [
-            # ("stanfordcars", str(lr_base * bs), str(bs), "100", "50"),
-            # ("oxfordflowers102", str(lr_base * bs), str(bs), "120", "50"),
-            # ("catsanddogs", str(lr_base * bs), str(bs), "120", "50"),
+            ("stanfordcars", str(lr_base * bs), str(bs), "100", "50"),
+            ("oxfordflowers102", str(lr_base * bs), str(bs), "120", "50"),
+            ("catsanddogs", str(lr_base * bs), str(bs), "120", "50"),
             ("cifar100", str(lr_base * bs), str(bs), "60", "30"),
             ("cifar10", str(lr_base * bs), str(bs), "50", "20"),
         ]:
             for adapter_config in [None, "8", "32", "sppara"]:
-                # for adapter_config in [None]:
-                # for adapter_config in ["8"]:
-                # for adapter_config in ["32"]:
-                # for adapter_config in ["sppara"]:
                 # fmt: off
                 if adapter_config is not None:
                     lr = str(2 * float(lr))
                 
                 command = [
                     "python", "main_resnet.py",
-                    # "--train",
+                    # "--train", # Added conditionally
                     "--epochs", epochs,
                     "--prune",
                     "--recovery_epochs", recovery_epocs,
@@ -43,7 +35,6 @@ for seed in ["1"]:
                     "--dataset", dataset,
                     "--method-type", method_type,
                     "--lr", lr,
-                    # "--optimizer", "rmsprop",
                     "--batch-size", bs,
                     "--seed", seed,
                 ]

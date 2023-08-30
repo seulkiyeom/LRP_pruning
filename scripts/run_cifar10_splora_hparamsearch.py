@@ -2,10 +2,8 @@ import subprocess
 
 model_name = "resnet18"
 
-# for splora_rank in [1, 2, 4, 8, 16, 32, 64]:
-#     for splora_init_range in [1e-6, 1e-5, 1e-4, 1e-3, 1e-2]:
-for splora_rank in [512]:
-    for splora_init_range in [1e-2]:
+for splora_rank in [1, 2, 4, 8, 16, 32, 64]:
+    for splora_init_range in [1e-6, 1e-5, 1e-4, 1e-3, 1e-2]:
         for method_type in [
             # "lrp",
             # "weight",

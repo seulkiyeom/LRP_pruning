@@ -4,21 +4,12 @@ from pathlib import Path
 model_name = "resnet18"
 splora_init_range = str(1e-4)
 
-# for seed in ["1", "2", "3"]:
 for seed in ["1"]:
     for method_type, norm in [
-        # ("taylor", True),
-        # ("taylor", False),
-        # ("grad", True),
-        # ("grad", False),
         ("weight", True),
-        # ("weight", False),
-        # ("lrp", True),
     ]:
         for dataset, lr, bs, epochs, recovery_epocs in [
             ("cifar10", str(0.01 / 256 * 64), "64", "40", "20"),
-            # ("oxfordflowers102", str(0.01 / 256 * 6), "6", "100", "50"),
-            # ("catsanddogs", str(0.01 / 256 * 16), "16", "100", "50"),
         ]:
             for splora_rank in [None, "8", "32"]:
                 # fmt: off

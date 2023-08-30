@@ -3,13 +3,18 @@ from pathlib import Path
 
 model_name = "vit_b_16"
 
-for seed in ["1", "2", "3"]:
+base_lr = 0.0125
+base_bs = 32
+bs = 16
+
+
+# fmt: off
+for seed in ["1"]:
     for dataset, lr, prune_lr, bs, epochs, recovery_epocs in [
-        ("cifar10", "0.0125", "0.00125", "32", "20", "10"),
-        ("oxfordflowers102", "0.0125", "0.00125", "32", "50", "20"),
-        ("catsanddogs", "0.0125", "0.00125", "32", "50", "20"),
-        # ("stanfordcars", "0.0125", "0.00125", "32", "50", "20"),
-        # ("cifar100", "0.0125", "0.00125", "32", "20", "10"),
+        ("cifar100", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 10), str(bs), "20", "10"),
+        ("oxfordflowers102", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "50", "20"),
+        ("catsanddogs", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "50", "20"),
+        ("stanfordcars", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "50", "20"),
     ]:
         # fmt: off
         command = [
@@ -25,7 +30,6 @@ for seed in ["1", "2", "3"]:
             # "--train",  # Added conditionally later in script
             "--prune",
         ]
-        # fmt: on
 
         ckpt = f"weights/{model_name}_{dataset}_1.0_seed={seed}.pth"
 
@@ -36,3 +40,5 @@ for seed in ["1", "2", "3"]:
 
         print(command)
         subprocess.call(command)
+
+# fmt: on

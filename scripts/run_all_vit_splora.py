@@ -5,17 +5,17 @@ model_name = "vit_b_16"
 
 base_lr = 3.0
 base_bs = 256
-bs = 32
+bs = 16
 
 
 # fmt: off
 for seed in ["1"]:
     for dataset, lr, prune_lr, bs, epochs, recovery_epocs in [
-        # ("cifar10", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "20", "10"),
+        ("cifar10", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "20", "10"),
+        ("cifar100", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "20", "10"),
         ("oxfordflowers102", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "50", "20"),
         ("catsanddogs", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "50", "20"),
-        # ("stanfordcars", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "50", "20"),
-        # ("cifar100", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "20", "10"),
+        ("stanfordcars", str(base_lr * bs / base_bs), str(base_lr * bs / base_bs / 3.0), str(bs), "50", "20"),
     ]:
         # fmt: off
         command = [
