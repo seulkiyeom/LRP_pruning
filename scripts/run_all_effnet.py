@@ -26,7 +26,7 @@ for seed in ["1", "2", "3"]:
                     lr = str(2 * float(lr))
                 
                 command = [
-                    "python", "main_resnet.py",
+                    "python", "main_cnn.py",
                     # "--train", # Added conditionally
                     "--epochs", epochs,
                     "--prune",

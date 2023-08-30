@@ -17,7 +17,7 @@ for splora_rank in [1, 2, 4, 8, 16, 32, 64]:
                     continue
                 # fmt: off
                 command = [
-                    "python", "main_resnet.py",
+                    "python", "main_cnn.py",
                     "--train",
                     "--epochs", "20",
                     "--prune",

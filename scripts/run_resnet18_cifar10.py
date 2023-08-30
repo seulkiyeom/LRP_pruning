@@ -14,7 +14,7 @@ for seed in ["1"]:
             for splora_rank in [None, "8", "32"]:
                 # fmt: off
                 command = [
-                    "python", "main_resnet.py",
+                    "python", "main_cnn.py",
                     # "--train",
                     "--epochs", epochs,
                     "--prune",

@@ -35,7 +35,7 @@ for seed in ["1"]:
                 ]:
                     # fmt: off
                     command = [
-                        "python", "main_resnet.py",
+                        "python", "main_cnn.py",
                         # "--train",
                         "--epochs", epochs,
                         "--prune",

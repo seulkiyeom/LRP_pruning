@@ -21,7 +21,7 @@ for seed in ["1", "2", "3"]:
             for adapter_config in [None, "8", "32", "sppara"]:
                 # fmt: off
                 command = [
-                    "python", "main_resnet.py",
+                    "python", "main_cnn.py",
                     # "--train",
                     "--epochs", epochs,
                     "--prune",

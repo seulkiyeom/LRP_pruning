@@ -15,7 +15,7 @@ for method_type in [
         for seed in ["1", "2", "3"]:
             # fmt: off
             command = [
-                "python", "main_resnet.py",
+                "python", "main_cnn.py",
                 "--train",
                 "--prune",
                 "--arch", "resnet50",
